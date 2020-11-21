@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <!--todo: bundle localy-->
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    </script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="dist/main.js"></script>
+</head>
+<body>
+    <h1>Sound wave particle simulator</h1>
+    <svg id ='diagram3' style="display:block;width: 100%;"></svg>
+    <h3>Dervived properties</h3>
+    <ul>
+        <li id="pressure"></li>
+        <li id="sound-pressure-level"></li>
+    </ul>
+    <h2>Explanation</h2>
+    The sound above is being emitted by a source vibrating on the left hand side, and heard by an listener (or their eardrum) on the right.
+    Because we simulate a constant tone, it's closest to emulating a speaker playing a constant tone. But if you imagine a different amplitude envelope, changing tone, etc it could just as well be a guitar, voice box, table some one banged, etc.
+    This simulation is one dimensional - we only consider the object vibrating towards and away from the listener - in reality this all takes place in 3 dimensions.
+    The wave being simulated essentially causes the eardrum to replicate the vibration of the source.
+    <h3>How do sound waves move?</h3>
+    <p>
+    When an object vibrates it moves rapidly back and forth.
+    When it moves forwards, it pushes the air molecules in front of it forwards, causing an increase in air pressure. And when it moves away, it leaves extra space for the molecules to diffuse into, causing a decrease in air pressure as they move backwards into it.
+    If you imagine the air between source and listener as slices of air, this pushing and pulling of the layer directly in front of the source has a knock on effect of pushing/pulling the second layer in front of it.
+    This continues forward, with each layer of air causing the one in front to vibrate, propergating the vibration of the source forwards towards the listener.
+    Eventualy the layer of air directly in front of the eardrum will beging to vibrate, pushing against the eardrum and making it vibrate as well - which is what our brain then interprets as sound.
+
+    Thus, without any net movement in molecules, a wave of air pressure travels from a vibrating object to your ear.
+
+
+    //discuss air particles
+
+    When the initial object vibrates in a repeat motion - moving forward and backward at a constant rate, it causes a predicable cycle in the chances of air pressure, low to high to low again. This is what we characterize as a wave.
+    </p>
+    <h4>Modeling as particles, not molecules</h4>
+    <p>The dots you see in the simulation above represent air particles - not molecules.
+        //todo: explain the difference
+    </p>
+    <h3>Characteristics of a sound wave</h3>
+    How does the above description relate to the qualities of sound we know?
+    Frequency - in hertz (hz), the number of wave cycles per second
+    In the simulation above, one cycle is from one band of high pressure to the next.
+    //todo: explain how this relates to proerties we see
+    tone - the shape of the pressure cycle
+    This is how air pressure at a given point changes over time.
+    If you plot this on a graph, you see the familar soundwave patterns (sin, triangle, etc)
+    Amplitude - the amount of pressure change relative to the ambiant pressure
+    How many air molecules are pushed into the high pressure bands relative to normal
+    The bigger the distance an object vibrates back and forht, the more air molecules it pushes, leading to higher pressure (and lower pressure when it moves back).
+    <h3>How do Frequency, tone, Amplitude relate to the simulation?</h3>
+    It's directly related to the movement of the emiting object when vibrating, and therefor the movement of air particles.
+    The formuale for a air particles displacement is:
+    $${displacement}=A \cos (k x - wt)$$
+    Where:
+    <ul>
+        <li>
+            $A$ is how far the particle is pushed forwarded by high pressure behind it (and pushed backwards by high pressure in front of it).
+    // todo: how does this relate to sound pressure
+        </li>
+        <li>    $k$ is wave cycles per meter. If you pause the simulation above, it's the number of high pressure areas within a 1 meter distance.
+            In radian, $k=2\pi/{waveLength}$
+        </li>
+        <li>
+            $x$ is the particle's distance from the wave source, which determines which point in the wave cycle the particle is at at a given instant.
+        </li>
+        <li>
+                $w$ is wave cycles per second (the time equivilent to k)
+    In radians $w=2\pi{f}$, where $f$ is frequency
+        </li>
+        <li>    $t$ is the time since the sound starting vibrating.</li>
+    </ul>
+    ${waveLength}$ is $v/f$, where $f$ is frequency and $v$ is the speed of sound in the vibrating medium (speed that the vibrations propergate at). For air at $20^\circ C$,  $v=343m/s$. This isn't modeled in the simulation because it's depends on molecules - not particles.
+
+    Sources:
+    https://en.wikipedia.org/wiki/Wave_vector
+    https://en.wikipedia.org/wiki/Particle_displacement   
+    https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html 
+    <h3>Soundpressure</h3>
+    k is cycles per meter in x direction
+
+    given by $$p = v \rho c_2 k_x/w$$
+    Particle_displacement meters = 0.1m
+    density = 1.203 kg/m3
+    c = 343m/s
+    m * (kg/m3) * (m^2)/s^2 = kg/s^2
+    we're missing a /m (per meter) to make units match pressure
+    is that what k_x is? Try assuming it's 1, what values to we get?
+    compare to known value of sound pressure
+    = pa = N/m^2 = (kg*m/s^2)/m^2 = kg/s^2*m
+    $$p = {displacement} \rho c_2 k_x$$
+    $$p = 0.1 * 1.203 * 343^2$$ = 14152pa, that is quite loud, accouding to 
+    https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure
+
+
+    try tis: https://physics.stackexchange.com/a/110131
+
+
+    where
+    <ul>
+        <li>p is the acoustic pressure in the medium;1.204  for air </li>
+        <li>v is particle velocity (m/s)</li>
+        <li>$\rho$ is the volumetric mass density of the medium;</li>
+        <li>$c$ is the speed of the sound waves traveling in the medium; (m/s)</li>
+        <li>$w$ is wave cylces per second (v/w=displacement)</li>
+        <li>$k_x$ is (is this just direction?</li>
+
+
+    </ul>
+    Taken from
+    https://en.wikipedia.org/wiki/Particle_displacement
+    https://wikimedia.org/api/rest_v1/media/math/render/svg/da35416c88799a2592b21973285ebac8863aabce
+    https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_acoustic_impedance
+    https://en.wikipedia.org/wiki/Density#Air
+
+</body>
+</html
