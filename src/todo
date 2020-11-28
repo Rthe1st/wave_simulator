@@ -1,0 +1,26 @@
+todo:
+label source and listener on diagram
+display the drived values being used in the simualtion
+    (wave lenght, k, etc)
+label the pressure/displacement graphs better
+    make then optional
+Add moving 'speaker' cone to left of map
+    add some kind of UI limit do stop the cone being moves off the left of the map
+pressure graphdisplacement graphs have updside down scales and 
+
+to make it clear that each dot is tracking one particles
+    use highlighting on mouse over to make better
+hide particles within 2*maxdisplacement of cone to prevent overlap
+
+stetch: simulate propogation of changes in sounds from source to listener
+    instead of it being instanious
+
+    To do this:
+        every time an input changes, save copy of state + timestamp
+        for each state, use speed * timestamp - nextModelTimestamp
+            to calcualte the max/min X of the canvas effected by these model settings
+        then sort particles by X, and apply the correct model for the X value
+    complication:
+        if speed is changes, new state waves can catch passed waves
+        to handle: workout where the is overlap
+            in those areas, make displacement the sum of displacements from all overlapping states
