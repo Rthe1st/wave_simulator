@@ -1,6 +1,8 @@
 import * as d3 from 'd3';
 import * as dat from 'dat.gui';
 
+import { waveforms } from './waveforms';
+
 function formatSiPrefix(number, unit) {
   // guesses a prefix based on the position of the most significant digit
   // we ignore prefixes for 10 and 100 so that we change units every factor of 1000
@@ -39,57 +41,70 @@ function formatSiPrefix(number, unit) {
   return rounded + prefix + unit;
 }
 
-function setup(svg) {
+// For drawing that only has to be done one, at the start
+// independent of time or user controlled variables
+function setup(svg, layout) {
 
+  // create a particle layer so that particles never
+  // draw over graphs, annotations, etc
   d3.select(svg).append('g').attr('class', 'particleLayer');
   let overlayLayer = d3.select(svg).append('g').attr('class', 'overlayLayer');
 
+  let height = svg.getBoundingClientRect().height;
+
+  // the graph above the particle simulator
+  // showing the pressure at each particles origin X
   overlayLayer.append('path')
-    .datum([])
-    .attr('class', 'level-curve')
-    .attr('d', d3.line())
+    .attr('id', 'pressure-curve')
     .attr('stroke', 'black')
     .attr('stroke-width', 1)
-    .attr("fill", "transparent");
+    .attr("fill", "transparent")
+    .attr("transform", `translate(0,${height * 0.15})`);
 
+  // the graph below the particle simulator
+  // showing the displacement of each particle from it's origin X
   overlayLayer.append('path')
-    .datum([])
-    .attr('class', 'displacement-curve')
-    .attr('d', d3.line())
+    .attr('id', 'displacement-curve')
     .attr('stroke', 'black')
     .attr('stroke-width', 1)
-    .attr("fill", "transparent");
-}
+    .attr("fill", "transparent")
+    .attr("transform", `translate(0,${height * 0.85})`);
 
-function speakerCone(svg, particleArea) {
-  d3.select(svg).append("line")
-    .attr("class", "cone")
+  // the speaker cone to the left of the particles
+  overlayLayer.append("line")
+    .attr("id", "cone")
     .style("stroke", "black")
-    .attr("x1", particleArea.x + (particleArea.width * 0.1))
-    .attr("y1", particleArea.y)
-    .attr("x2", particleArea.x + (particleArea.width * 0.1))
-    .attr("y2", particleArea.y + particleArea.height);
+    .attr("x1", layout.speakerConeX)
+    .attr("y1", layout.particleArea.y)
+    .attr("x2", layout.speakerConeX)
+    .attr("y2", layout.particleArea.y + layout.particleArea.height);
+
+  // other stuff
+
+  drawPressureChart(svg, layout.particleArea);
+  drawDisplacementChart(svg, layout.particleArea);
+  metersScale(svg, layout.particleArea);
+  waveLengthScale(svg, layout.particleArea);
 }
 
 function updateSpeakerCone(svg, particleArea, modelCache, model) {
-  // fakeX is the X is the closest x of visibile particles to the cone
-  // (which is 2*maxdisplacement away so they never intersect it)
-  // we use this so the cones displacmenet is in sync with theres
+  // fakeX is the X is the closest x of visible particles to the cone
+  // (which is 2*maxDisplacement away so they never intersect it)
+  // we use this so the cones displacement is in sync with theres
   // and it looks like it's pushing them
-  // -10 is so that it's slightly ahead of their displacment curve
+  // -10 is so that it's slightly ahead of their displacement curve
   // to accentuate the pushing effect
   let fakeX = particleArea.x + (particleArea.width * 0.1) + 2 * model.maxDisplacement;
-  let displacement = displacementTransform(fakeX, modelCache, 0, model.maxDisplacement, model.waveFunction);
-  d3.select(svg).select(".cone")
+  let displacement = displacementTransform(fakeX, modelCache, 0, model.maxDisplacement, model.waveform.function);
+  d3.select(svg).select("#cone")
     .attr("transform", `translate(${displacement},0)`);
-  let speakerConeX = particleArea.x + (particleArea.width * 0.1);
-  return speakerConeX;
 }
 
 
 function drawPressureChart(svg, particleArea) {
   let svgDim = svg.getBoundingClientRect();
 
+  //todo: maybe replace this scale with a dB one?
   var yRange = d3.scaleLinear().domain([1, -1]).range([0, svgDim.height * 0.1]);
 
   var axis = d3.axisRight(yRange)
@@ -106,17 +121,10 @@ function drawPressureChart(svg, particleArea) {
     .attr("transform", `translate(${particleArea.x + particleArea.width},${y})`)
     .text("% of max");
 
-  //domain needs to be dynamic based on max displacement
-  let pressureYRange = d3.scaleLinear().domain([65754, -65754]).range([0, svgDim.height * 0.1]);
-
-  var axis = d3.axisLeft(pressureYRange)
-    .ticks(3, "s");
-
   d3.select(svg)
     .append("g")
-    .attr('class', 'pressure-chart')
-    .attr("transform", `translate(${particleArea.x},${y})`)
-    .call(axis);
+    .attr('id', 'pressure-chart')
+    .attr("transform", `translate(${particleArea.x},${y})`);
 
   d3.select(svg).append("text")
     .attr("transform", `translate(${particleArea.x},${y})`)
@@ -143,12 +151,22 @@ function drawDisplacementChart(svg, particleArea) {
 
   d3.select(svg)
     .append("g")
-    .attr('class', 'displacement-chart')
+    .attr('id', 'displacement-chart')
     .attr("transform", `translate(${particleArea.x},${y})`);
 
   d3.select(svg).append("text")
     .attr("transform", `translate(${particleArea.x},${y})`)
     .text("Displacement (m)");
+}
+
+function updateDisplacementChartAxis(height, maxDisplacement){
+  let pressureYRange = d3.scaleLinear().domain([maxDisplacement, -maxDisplacement]).range([0, height]);
+
+  var axis = d3.axisLeft(pressureYRange)
+    .ticks(3, "s");
+
+  d3.select('#displacement-chart')
+    .call(axis);
 }
 
 function cache(modelCache, model, svgWidth) {
@@ -165,7 +183,7 @@ function cache(modelCache, model, svgWidth) {
   model.pressure = pressure;
   //https://en.wikipedia.org/wiki/Sound_pressure#Sound_pressure_level
   let referencePressure = 20 * 0.000001;//20 microPa
-  let pressureRMS = pressure;
+  let pressureRMS = pressure * model.waveform.rms;
   let spl = 20 * Math.log10(pressureRMS / referencePressure)
   document.getElementById('sound-pressure-level').innerText = `Sound Pressure Level (dB): ${spl}`
 
@@ -185,12 +203,12 @@ function maxPressure(model, modelCache) {
   // https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_specific_acoustic_impedance
   // for reference, this should be 413 for actual speed of sound in air (and our assumed air pressure)
   // https://en.wikipedia.org/wiki/Acoustic_impedance#Effect_of_temperature
-  let roomairAccoutsitcImpedance = airDensity * model.speedOfSound;
-  modelCache.roomairAccoutsitcImpedance = roomairAccoutsitcImpedance;
-  let pressure = model.maxDisplacement * 2 * Math.PI * model.freq * roomairAccoutsitcImpedance;
+  let roomairAccousticImpedance = airDensity * model.speedOfSound;
+  modelCache.roomairAccousticImpedance = roomairAccousticImpedance;
+  let pressure = model.maxDisplacement * 2 * Math.PI * model.freq * roomairAccousticImpedance;
 
   document.getElementById('pressure').innerText = `Peak pressure (pa): ${pressure}`
-  document.getElementById('acoustic-impedance').innerText = `characteristic specific acoustic impedance: ${roomairAccoutsitcImpedance}`;
+  document.getElementById('acoustic-impedance').innerText = `characteristic specific acoustic impedance: ${roomairAccousticImpedance}`;
   return pressure;
 }
 
@@ -201,36 +219,37 @@ function displacement_equations(model, modelCache, particle) {
   let x = particle[0] * modelCache.toMetersScaleFactor;
   let displacement = model.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * t);
   let template = `$\${displacement}=A {F}(k x - wt)$$\
-  $$${formatSiPrefix(displacement, "m")}=${formatSiPrefix(model.maxDisplacement, "m")} ${model.tone} (k ${formatSiPrefix(x, "m")} - w${formatSiPrefix(t, "s")})$$
+  $$${formatSiPrefix(displacement, "m")}=${formatSiPrefix(model.maxDisplacement, "m")} ${model.waveform.equationName} (k ${formatSiPrefix(x, "m")} - w${formatSiPrefix(t, "s")})$$
   $$k=\\frac{2\\pi}{λ}, λ=\\frac{v}{f}$$
   $$k=\\frac{2\\pi}{${formatSiPrefix(modelCache.waveLength, "m")}}=${formatSiPrefix(2 * Math.PI * model.freq, "\\mathrm{^c/m}")}, λ=\\frac{${formatSiPrefix(model.speedOfSound, "m/s")}}{${formatSiPrefix(model.freq, "hz")}}=${formatSiPrefix(modelCache.waveLength, "m")}$$
   $$w=\\frac{2\\pi}{T} = 2\\pi f$$
   $$w=\\frac{2\\pi}{T} = 2\\pi ${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$`;
-  document.getElementById("displacement-equations").innerText = template;
+  let element = document.getElementById("displacement-equations");
+  element.innerText = template;
+  MathJax.typeset([element]);
 }
 
 function pressure_equations(model, modelCache) {
   let template = `
-$\$p=AZ_0w=${formatSiPrefix(model.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccoutsitcImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
+$\$p=AZ_0w=${formatSiPrefix(model.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccousticImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
 $$Z_0=ρc=1.204kg/m^3${formatSiPrefix(model.speedOfSound, "m/s")}$$
 $$w=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
 `
-  document.getElementById("pressure-equations").innerText = template;
+  let element = document.getElementById("pressure-equations");
+  element.innerText = template;
+  MathJax.typeset([element]);
 }
 
 function loudness_equations(model, modelCache) {
   let referencePressure = 20 * 0.000001;
-  //todo: you can only times by one for square waves
-  // for other waves it will be 0-1, depending on wave form
-  // todo: either hardcode known RMS's or calculate from sampling across
-  //0-2pi for each function
-  //https://en.wikipedia.org/wiki/Root_mean_square#In_common_waveforms
-  let pressureRMS = model.pressure * 1;
+  let pressureRMS = model.pressure * model.waveform.rms;
   let spl = 20 * Math.log10(pressureRMS / referencePressure);
   let template = `
   $\${SPL} = 20{log}_{10}(\\frac{p}{p_0})=20{log}_{10}(\\frac{${formatSiPrefix(pressureRMS, "pa")}}{${formatSiPrefix(referencePressure, "pa")}})=${formatSiPrefix(spl, "dB")}$$
   `
-  document.getElementById("loudness-equations").innerText = template;
+  let element = document.getElementById("loudness-equations");
+  element.innerText = template;
+  MathJax.typeset([element]);
 }
 
 window.onload = function () {
@@ -244,8 +263,7 @@ window.onload = function () {
     maxDisplacement: 0.1,
     size: 1,
     tone: 'sin',
-    //todo: move this to model cache
-    waveFunction: Math.sin,
+    waveform: waveforms['sin'],
     preset: 'C'
   }
 
@@ -260,18 +278,33 @@ window.onload = function () {
     height: svgDim.height * 0.6,
   };
 
-  setup(svg);
+  let layout = {
+    // initial speaker X, before displacement
+    // particles that might cross this should not be rendered
+    speakerConeX: particleArea.x + (particleArea.width * 0.1),
+    particleArea: particleArea,
+  }
+
+  let highlightedParticleCount = 3;
+
+  setup(svg,layout);
 
   let modelCache = {};
 
   modelCache = cache(modelCache, model, svgDim.width);
 
-  let controllers = []
+  let controllers = [];
 
   controllers.push(gui.add(model, 'particleNumber', 0, 8000, 100)
     .onChange(() => {
       particles = newParticleNumber(svg, particles, model.particleNumber, particleArea, model.size);
-      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor);
+      // the displacement and pressure curves need
+      // particles sorted on x axis so they can draw a line easily
+      // but we don't want to sort the original particles
+      // because random order makes it easy to add/remove particles
+      // evenly across the particle space
+      modelCache.sortedParticles = [...particles].sort((a, b) => a[0] - b[0]);
+      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     }));
 
   controllers.push(gui.add(model, 'size', 1, 10, 1)
@@ -288,7 +321,7 @@ window.onload = function () {
       meterScaleUpdate(svg, model.simWidth, particleArea);
       modelCache = cache(modelCache, model, svgDim.width);
       updateWaveLengthScale(svg, model.simWidth, particleArea, modelCache);
-      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor);
+      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     }));
 
   //todo: make steps better (bigger steps at bigger values)
@@ -315,7 +348,8 @@ window.onload = function () {
   let maxDisplacementController = gui.add(model, 'maxDisplacement', 0, 1, 0.00000001)
     .onChange(() => {
       modelCache = cache(modelCache, model, svgDim.width);
-      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor);
+      updateDisplacementChartAxis(svgDim.height*0.1, model.maxDisplacement);
+      highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     });
   controllers.push(maxDisplacementController);
 
@@ -336,34 +370,20 @@ window.onload = function () {
       modelCache = cache(modelCache, model, svgDim.width);
     });
 
-  //todo: add a complex one, like a rip of a piano not or something
-  //todo: save their rms values
   gui.add(model, 'tone').options(['sin', 'triangle', 'square'])
-    .onChange(() => {
-      switch (model.tone) {
-        case 'sin':
-          model.waveFunction = Math.sin;
-          break;
-        case 'triangle':
-          model.waveFunction = triangle;
-          break;
-        case 'square':
-          model.waveFunction = square;
-          break;
-      }
+    .onChange((tone) => {
+      model.waveform = waveforms[tone];
+      loudness_equations(model, modelCache);
     });
 
   particles = newParticleNumber(svg, particles, model.particleNumber, particleArea, model.size);
-  highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor);
-  metersScale(svg, particleArea);
+  modelCache.sortedParticles = [...particles].sort((a, b) => a[0] - b[0]);
+  highlightedParticles(svg, particles, model.size, model.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
   meterScaleUpdate(svg, model.simWidth, particleArea);
-  waveLengthScale(svg, model.simWidth, particleArea, modelCache.waveLength);
   updateWaveLengthScale(svg, model.simWidth, particleArea, modelCache);
-  update(svg, particles, modelCache, model, particleArea);
-  drawPressureChart(svg, particleArea);
-  drawDisplacementChart(svg, particleArea);
-  speakerCone(svg, particleArea);
+  update(svg, particles, modelCache, model, particleArea, layout.speakerConeX);
   displacement_equations(model, modelCache, particles[0]);
+  updateDisplacementChartAxis(svgDim.height*0.1, model.maxDisplacement);
 }
 
 function newParticleSize(svg, particles, size) {
@@ -375,39 +395,49 @@ function newParticleSize(svg, particles, size) {
 
 }
 
-function highlightedParticles(svg, particles, size, maxDisplacement) {
-  let highlightedParticleDisplacement = d3.select(svg)
-    .selectAll('.highlightedParticleDisplacement')
-    .data(particles.slice(0, 3));
+function highlightedParticles(svg, particles, size, maxDisplacement, howMany) {
 
-  let enterHighlightedParticleDisplacement = highlightedParticleDisplacement
+  let scaleFactor = 4;
+
+  let highlightedParticles = particles.slice(0, howMany);
+
+  // the displacement bars showing the range of a particles movement
+
+  let displacement = d3.select(svg)
+    .selectAll('.highlightedParticleDisplacement')
+    .data(highlightedParticles);
+
+  let enterDisplacement = displacement
     .enter().append("line")
     .attr('class', 'highlightedParticleDisplacement')
     .attr("stroke", "BLACK")
     .attr('stroke-width', 3);
 
-  highlightedParticleDisplacement.merge(enterHighlightedParticleDisplacement)
-    //need to do the below on update as well
+  displacement.merge(enterDisplacement)
     .attr("x1", d => d[0] - maxDisplacement)
-    .attr("y1", d => d[1] + size * 4)
+    .attr("y1", d => d[1] + size * scaleFactor)
     .attr("x2", d => d[0] + maxDisplacement)
-    .attr("y2", d => d[1] + size * 4);
+    .attr("y2", d => d[1] + size * scaleFactor);
 
-  highlightedParticleDisplacement
+  displacement
     .exit().remove();
+
+  // the actual particle
 
   let highlightedParticleSelection = d3.select(svg)
     .selectAll('.highlightedParticle')
-    .data(particles.slice(0, 3));
+    .data(highlightedParticles);
 
-  highlightedParticleSelection
+  let enterHighlightedParticleSelection = highlightedParticleSelection
     .enter().append("circle")
     .attr('class', 'highlightedParticle')
     .attr("stroke", "BLACK")
-    .attr("fill", "RED")
+    .attr("fill", "RED");
+
+  highlightedParticleSelection.merge(enterHighlightedParticleSelection)
     .attr("cx", d => d[0])
     .attr("cy", d => d[1])
-    .attr("r", size * 4);
+    .attr("r", size * scaleFactor);
 
   highlightedParticleSelection
     .exit().remove();
@@ -445,63 +475,64 @@ function newParticleNumber(svg, particles, requestedParticleNumber, bounds, size
   return particles;
 }
 
-function waveLengthScale(svg, simWidth, particleArea, waveLength) {
+function waveLengthScale(svg, particleArea) {
 
   d3.select(svg)
     .append("g")
-    .attr('class', 'wave-length-chart')
+    .attr('id', 'wave-length-chart')
     .attr("transform", `translate(${particleArea.x},${particleArea.y})`);
 }
 
 function updateWaveLengthScale(svg, simWidth, particleArea, modelCache) {
   let absDomainRange = simWidth / modelCache.waveLength;
-  //keep in sync with the left bound of particle area where we start to draw particles
-  // which is replaced to max displacement so they dont move off left of screen
+  //keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
+  // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = absDomainRange * 0.1;
-  let pressureYRange = d3.scaleLinear().domain([-domainBelow0, absDomainRange - domainBelow0]).range([0, particleArea.width]);
+  let xRange = d3.scaleLinear().domain([-domainBelow0, absDomainRange - domainBelow0]).range([0, particleArea.width]);
 
-  var axis = d3.axisTop(pressureYRange)
+  var axis = d3.axisTop(xRange)
     .tickFormat(d3.format("s"));
 
-  d3.select(svg).select('.wave-length-chart')
+  d3.select(svg).select('#wave-length-chart')
     .call(axis);
 }
 
 function metersScale(svg, particleArea) {
   d3.select(svg)
     .append("g")
-    .attr('class', 'meters-chart')
+    .attr('id', 'meters-chart')
     .attr("transform", `translate(${particleArea.x},${particleArea.y + particleArea.height})`);
 }
 
 function meterScaleUpdate(svg, simWidth, particleArea) {
-  //keep in sync with the left bound of particle area where we start to draw particles
-  // which is replaced to max displacement so they dont move off left of screen
+  //keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
+  // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = simWidth * 0.1;
-  let pressureYRange = d3.scaleLinear().domain([-domainBelow0, simWidth - domainBelow0]).range([0, particleArea.width]);
+  let xRange = d3.scaleLinear().domain([-domainBelow0, simWidth - domainBelow0]).range([0, particleArea.width]);
 
-  var axis = d3.axisBottom(pressureYRange)
+  var axis = d3.axisBottom(xRange)
     .tickFormat(d3.format("s"));
 
-  d3.select(svg).select('.meters-chart')
+  d3.select(svg).select('#meters-chart')
     .call(axis);
 }
 
 //time in seconds
 let t = 0;
 
-function update(svg, particles, modelCache, model, particleArea) {
+function update(svg, particles, modelCache, model, particleArea, speakerConeX) {
   t += 1;
-  if (t % 1 == 0) {
-    displacement_equations(model, modelCache, particles[0]);
-    //todo: just type set the elements that changed, not the whole page
-    MathJax.typeset();
-  }
-  let speakerConeX = updateSpeakerCone(svg, particleArea, modelCache, model);
+  // disable for now because
+  // 1) worried about mathjax performance and memory leaks
+  // 2) better to add a time slider so you can explore the equation
+  // with your own time - using animation time is too fast/confusing
+  // displacement_equations(model, modelCache, particles[0]);
+  updateSpeakerCone(svg, particleArea, modelCache, model);
   updateParticles(svg, particles, modelCache, model, speakerConeX);
   updateLevels(svg, particles, modelCache, model);
   updatedisplacement(svg, particles, modelCache, model);
-  window.setTimeout(update, 50, svg, particles, modelCache, model, particleArea)
+  //todo: account for time between calls
+  window.setTimeout(update, 50, svg, particles, modelCache, model, particleArea, speakerConeX)
 }
 
 //tracks displacement
@@ -528,23 +559,13 @@ function updatedisplacement(svg, particles, modelCache, model) {
   highlightedParticleSelection.exit().remove();
 
   highlightedParticleSelection.merge(enterHighlightedParticleSelection)
-    .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, model.maxDisplacement, model.waveFunction) + height * 0.85);
+    .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, model.maxDisplacement, model.waveform.function) + height * 0.85);
 
-  let particleDisplacements = particles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, model.maxDisplacement, model.waveFunction)])
-    .map(p => [p[0], p[1] + height * 0.85])
-    .sort((a, b) => a[0] - b[0])
+  let particleDisplacements = modelCache.sortedParticles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, model.maxDisplacement, model.waveform.function)]);
 
-  d3.select(svg).selectAll('.displacement-curve')
+  d3.select(svg).selectAll('#displacement-curve')
     .datum(particleDisplacements)
     .attr('d', d3.line());
-
-  let pressureYRange = d3.scaleLinear().domain([model.maxDisplacement, -model.maxDisplacement]).range([0, height * 0.1]);
-
-  var axis = d3.axisLeft(pressureYRange)
-    .ticks(3, "s");
-
-  d3.select('.displacement-chart')
-    .call(axis);
 }
 
 // tracks pressure
@@ -573,43 +594,24 @@ function updateLevels(svg, particles, modelCache, model) {
   highlightedParticleSelection.exit().remove();
 
   highlightedParticleSelection.merge(enterHighlightedParticleSelection)
-    .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, model.maxDisplacement, model.waveFunction) + height * 0.15);
+    .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, model.maxDisplacement, model.waveform.function) + height * 0.15);
 
-  let particleDisplacements = particles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, model.maxDisplacement, model.waveFunction)])
-    .map(p => [p[0], p[1] + height * 0.15])
-    .sort((a, b) => a[0] - b[0]);
+  let particleDisplacements = modelCache.sortedParticles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, model.maxDisplacement, model.waveform.function)]);
 
-  d3.select(svg).selectAll('.level-curve')
+  d3.select(svg).select('#pressure-curve')
     .datum(particleDisplacements)
-    .attr('d', d3.line());
+    .attr('d', d3.line());//todo: don't make new line eveyr time?
+
+  let pressureYRange = d3.scaleLinear().domain([model.pressure, -model.pressure]).range([0, height * 0.1]);
+
+  var axis = d3.axisLeft(pressureYRange)
+    .ticks(3, "s");
+  
+  d3.select('#pressure-chart')
+    .call(axis);
 
 }
 
-function square(radians) {
-  if ((radians % (2 * Math.PI)) < Math.PI) {
-    return -1;
-  } else {
-    return 1;
-  }
-}
-
-//todo: why is this broken for first few cycles?
-function triangle(radians) {
-  let placeInCycle = radians % (Math.PI / 2);
-  let percentOfCycle = placeInCycle / (Math.PI / 2);
-  let cycle = radians % (2 * Math.PI);
-  if (cycle < 0.5 * Math.PI) {
-    return percentOfCycle;
-  } else if (cycle < Math.PI) {
-    return 1 - percentOfCycle;
-  } else if (cycle < 1.5 * Math.PI) {
-    return -percentOfCycle;
-  } else {
-    return -(1 - percentOfCycle);
-  }
-}
-
-// https://en.wikipedia.org/wiki/Wave_vector
 function displacementTransform(x, modelCache, phase, maxDisplacement, waveFunction) {
 
   //todo: cache this across time
@@ -623,9 +625,7 @@ function displacementTransform(x, modelCache, phase, maxDisplacement, waveFuncti
 
 function updateParticles(svg, particles, modelCache, model, speakerConeX) {
 
-  // let maxDisInCords = model.maxDisplacement*modelCache.toCordsScaleFactor;
-
-  let particleDisplacements = particles.map(p => [p[0] + displacementTransform(p[0], modelCache, 0, model.maxDisplacement, model.waveFunction), p[0]]);
+  let particleDisplacements = particles.map(p => [p[0] + displacementTransform(p[0], modelCache, 0, model.maxDisplacement, model.waveform.function), p[0]]);
   d3.select(svg)
     .selectAll('.particle')
     .data(particleDisplacements.slice(3))
