@@ -8,10 +8,12 @@ add a time slides for displacement of particle equation
 label the max displacement bars
 more presets
 better axis labels (include units on the ticks?)
-fix animation timings
-    use requestanimation frames timestamp to work out animation progress
-    atm animation speed can look faster for a low timescale then a high one
-    hopefully this fixes that
-
+warn when animation speed to fast for particles
+    leading to misleading animation
+allow better time range scaling
+try work out how to show (or at least explain why not) quite noises at low freq
+at som epresets that just show waves property relationships nicely
+    even if they arnt close to real worl noises
+generay document what ranges diagrams work well in
 
 stretch: play the sounds

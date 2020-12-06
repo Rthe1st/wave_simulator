@@ -31041,24 +31041,6 @@ function setup(svg, layout) {
 
   let height = svg.getBoundingClientRect().height;
 
-  // the graph above the particle simulator
-  // showing the pressure at each particles origin X
-  overlayLayer.append('path')
-    .attr('id', 'pressure-curve')
-    .attr('stroke', 'black')
-    .attr('stroke-width', 1)
-    .attr("fill", "transparent")
-    .attr("transform", `translate(0,${layout.chartHeights * 0.5 + 10})`);
-
-  // the graph below the particle simulator
-  // showing the displacement of each particle from it's origin X
-  overlayLayer.append('path')
-    .attr('id', 'displacement-curve')
-    .attr('stroke', 'black')
-    .attr('stroke-width', 1)
-    .attr("fill", "transparent")
-    .attr("transform", `translate(0,${height - layout.chartHeights - 10 + layout.chartHeights * 0.5})`);
-
   // the speaker cone to the left of the particles
   overlayLayer.append("line")
     .attr("id", "cone")
@@ -31160,7 +31142,7 @@ function cache(modelCache, model, svgWidth) {
   modelCache.waveLength = model.speedOfSound / model.freq;
   // cycles per meter, angular freq
   modelCache.k = 2 * Math.PI / modelCache.waveLength;
-  modelCache.wTimeScale = modelCache.w * model.timeScale;
+  modelCache.wTimeScale = modelCache.w * modelCache.timeScale;
   modelCache.toMetersScaleFactor = modelCache.simWidth / svgWidth;
   modelCache.toCordsScaleFactor = svgWidth / modelCache.simWidth;
 
@@ -31195,14 +31177,16 @@ function displacement_equations(model, modelCache, particle, time) {
   //todo: need to map model.tone==sin to cos
   //todo: explain how k and w account for wave position
   // explain k is https://en.wikipedia.org/wiki/Spatial_frequency
-  let x = particle[0] * modelCache.toMetersScaleFactor;
-  let displacement = modelCache.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * time);
-  let template = `$\${displacement}=A {F}(k x - wt)$$\
+  let x = document.getElementById('equation-x').value * modelCache.toMetersScaleFactor;
+  let displacement = modelCache.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * time*0.000001);
+  let template = `
+  $$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, f=${formatSiPrefix(model.freq, "{Hz}")}, t=${formatSiPrefix(time, "s")}, x=${formatSiPrefix(x, "m")}, v=${formatSiPrefix(model.speedOfSound, "{m/s}")}$$
+  $$λ=\\frac{v}{f}=\\frac{${formatSiPrefix(model.speedOfSound, "m/s")}}{${formatSiPrefix(model.freq, "Hz")}}=${formatSiPrefix(modelCache.waveLength, "m")}$$
+  $$k=\\frac{2\\pi}{λ}=\\frac{2\\pi}{${formatSiPrefix(modelCache.waveLength, "m")}}=${formatSiPrefix(2*Math.PI/modelCache.waveLength, "^c/s")}$$
+  $$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
+  $\${displacement}=A {F}(k x - wt)$$\
   $$${formatSiPrefix(displacement, "m")}=${formatSiPrefix(modelCache.maxDisplacement, "m")} ${model.waveform.equationName} (k ${formatSiPrefix(x, "m")} - w${formatSiPrefix(time, "s")})$$
-  $$k=\\frac{2\\pi}{λ}, λ=\\frac{v}{f}$$
-  $$k=\\frac{2\\pi}{${formatSiPrefix(modelCache.waveLength, "m")}}=${formatSiPrefix(2 * Math.PI * model.freq, "\\mathrm{^c/m}")}, λ=\\frac{${formatSiPrefix(model.speedOfSound, "m/s")}}{${formatSiPrefix(model.freq, "hz")}}=${formatSiPrefix(modelCache.waveLength, "m")}$$
-  $$w=\\frac{2\\pi}{T} = 2\\pi f$$
-  $$w=\\frac{2\\pi}{T} = 2\\pi ${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$`;
+`;
   let element = document.getElementById("displacement-equations");
   element.innerText = template;
   MathJax.typeset([element]);
@@ -31210,9 +31194,10 @@ function displacement_equations(model, modelCache, particle, time) {
 
 function pressureEquations(model, modelCache) {
   let template = `
-$\$p=AZ_0w=${formatSiPrefix(modelCache.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccousticImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
+$$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, ρ=1.204kg/m^3, c=${formatSiPrefix(model.speedOfSound, "m/s")}$$
 $$Z_0=ρc=1.204kg/m^3${formatSiPrefix(model.speedOfSound, "m/s")}$$
-$$w=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
+$$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
+$$p=AZ_0w=${formatSiPrefix(modelCache.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccousticImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
 `
   let element = document.getElementById("pressure-equations");
   element.innerText = template;
@@ -31224,6 +31209,7 @@ function loudnessEquations(model, modelCache) {
   let pressureRMS = model.pressure * model.waveform.rms;
   let spl = 20 * Math.log10(pressureRMS / referencePressure);
   let template = `
+  $$p_0=${formatSiPrefix(referencePressure, "pa")}$$
   $\${SPL} = 20{log}_{10}(\\frac{p}{p_0})=20{log}_{10}(\\frac{${formatSiPrefix(pressureRMS, "pa")}}{${formatSiPrefix(referencePressure, "pa")}})=${formatSiPrefix(spl, "dB")}$$
   `
   let element = document.getElementById("loudness-equations");
@@ -31235,6 +31221,8 @@ function unitToScalingFactor(unit) {
   let scalingFactor = 1;
   switch (unit) {
     case "meters": scalingFactor = 1; break;
+    case "100 millimeters": scalingFactor = 0.1; break;
+    case "10 millimeters": scalingFactor = 0.01; break;
     case "millimeters": scalingFactor = 0.001; break;
     case "micrometers": scalingFactor = 0.000001; break;
     case "nanometers": scalingFactor = 0.000000001; break;
@@ -31242,18 +31230,25 @@ function unitToScalingFactor(unit) {
   return scalingFactor;
 }
 
+let ctx;
+
 window.onload = function () {
 
+  canvas.width = document.getElementById("diagram").getBoundingClientRect().width;
+  canvas.height = document.getElementById("diagram").getBoundingClientRect().height;
+  ctx = document.getElementById("canvas").getContext('2d');
+
   let model = {
-    widthUnit: "millimeters",
-    width: 100,
-    timeScale: 0.0001,
-    freq: 261.63,
+    widthUnit: "micrometers",
+    width: 100000,
+    timeUnit: "micrometers",
+    timeScale: 10,
+    freq: 2000,
     //todo: consider making this a dropdown
     // of speed of sound at specific temperatures/materials
     speedOfSound: 343,
-    particleNumber: 2000,
-    maxDisplacementUnit: "millimeters",
+    particleNumber: 5010,
+    maxDisplacementUnit: "micrometers",
     maxDisplacement: 500,
     size: 1,
     tone: 'sin',
@@ -31292,9 +31287,11 @@ window.onload = function () {
   modelCache.displacementCurveYoffset = svgDim.height - layout.chartHeights - 10 + layout.chartHeights * 0.5;
   modelCache.simWidth = unitToScalingFactor(model.widthUnit) * model.width;
   modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.maxDisplacement;
+  modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
+  modelCache.size = model.size;
   modelCache = cache(modelCache, model, svgDim.width);
 
-  gui.add(model, 'particleNumber', 0, 8000, 100)
+  gui.add(model, 'particleNumber', 10, 15010, 10)
     .onChange(() => {
       particles = newParticleNumber(svg, particles, model.particleNumber, particleArea, model.size);
       // the displacement and pressure curves need
@@ -31303,42 +31300,50 @@ window.onload = function () {
       // because random order makes it easy to add/remove particles
       // evenly across the particle space
       modelCache.sortedParticles = [...particles].sort((a, b) => a[0] - b[0]);
-      modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+      modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     });
 
-  gui.add(model, 'size', 1, 10, 1)
-    .onChange(() => {
-      newParticleSize(svg, particles, model.size);
+  gui.add(model, 'size', 1, 5, 1)
+    .onChange((size) => {
+      modelCache.size = size;
+      modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     });
 
-  gui.add(model, 'widthUnit', ["meters", "millimeters", "micrometers", "nanometers"])
-    .onChange((value) => {
-      modelCache.simWidth = unitToScalingFactor(value) * model.width;
-      meterScaleUpdate(svg, modelCache.simWidth, particleArea);
-      modelCache = cache(modelCache, model, svgDim.width);
-      updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
-      modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-    });
+  // gui.add(model, 'widthUnit', ["micrometers"])
+  //   .onChange((value) => {
+  //     modelCache.simWidth = unitToScalingFactor(value) * model.width;
+  //     meterScaleUpdate(svg, modelCache.simWidth, particleArea);
+  //     modelCache = cache(modelCache, model, svgDim.width);
+  //     updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
+  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+  //   });
 
 
-  gui.add(model, 'width', 0, 1000, 1)
-    .onChange(() => {
-      modelCache.simWidth = unitToScalingFactor(model.widthUnit) * model.width;
-      meterScaleUpdate(svg, modelCache.simWidth, particleArea);
-      modelCache = cache(modelCache, model, svgDim.width);
-      updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
-      modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-    });
+  // gui.add(model, 'width', 100000, 100000)
+  //   .onChange(() => {
+  //     modelCache.simWidth = unitToScalingFactor(model.widthUnit) * model.width;
+  //     meterScaleUpdate(svg, modelCache.simWidth, particleArea);
+  //     modelCache = cache(modelCache, model, svgDim.width);
+  //     updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
+  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+  //   });
+
+    // gui.add(model, 'timeUnit', ["micrometers"])
+    // .onChange((value) => {
+    //   modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
+    //   modelCache = cache(modelCache, model, svgDim.width);
+    // });
 
   //todo: make steps better (bigger steps at bigger values)
   // or one of N fixed speeds
   // if you let this get big (0.2101) wave starts going backwards, why?
-  gui.add(model, 'timeScale', 0.00001, 0.0005, 0.00001)
-    .onChange(() => {
+  gui.add(model, 'timeScale', 10, 500, 10)
+    .onChange((value) => {
+      modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
       modelCache = cache(modelCache, model, svgDim.width);
     });
 
-  gui.add(model, 'freq', 20, 20020, 1)
+  gui.add(model, 'freq', 2000, 20000, 10)
     .onChange(() => {
       modelCache = cache(modelCache, model, svgDim.width);
       updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
@@ -31353,23 +31358,23 @@ window.onload = function () {
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
-  gui.add(model, 'maxDisplacementUnit', ["millimeters", "micrometers", "nanometers"])
-    .onChange((value) => {
-      modelCache.maxDisplacement = unitToScalingFactor(value) * model.maxDisplacement;
-      modelCache = cache(modelCache, model, svgDim.width);
-      updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
-      updatePressureChartAxis(layout.chartHeights, model.pressure);
-      modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-      displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
-    });
+  // gui.add(model, 'maxDisplacementUnit', ["micrometers"])
+  //   .onChange((value) => {
+  //     modelCache.maxDisplacement = unitToScalingFactor(value) * model.maxDisplacement;
+  //     modelCache = cache(modelCache, model, svgDim.width);
+  //     updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
+  //     updatePressureChartAxis(layout.chartHeights, model.pressure);
+  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+  //     displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
+  //   });
 
-  gui.add(model, 'maxDisplacement', 0, 1000, 1)
+  gui.add(model, 'maxDisplacement', 100, 10000, 100)
     .onChange(() => {
       modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.maxDisplacement;
       modelCache = cache(modelCache, model, svgDim.width);
       updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
       updatePressureChartAxis(layout.chartHeights, model.pressure);
-      modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+      modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
@@ -31382,31 +31387,27 @@ window.onload = function () {
 
   particles = newParticleNumber(svg, particles, model.particleNumber, particleArea, model.size);
   modelCache.sortedParticles = [...particles].sort((a, b) => a[0] - b[0]);
-  modelCache.highLightedParticles = highlightedParticles(svg, particles, model.size, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
+  modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
   meterScaleUpdate(svg, modelCache.simWidth, particleArea);
   updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
-  update(svg, particles, modelCache, model, particleArea, layout.speakerConeX);
+  window.requestAnimationFrame((newTimestamp) => update(svg, particles, modelCache, model, particleArea, layout.speakerConeX, newTimestamp))
   displacement_equations(model, modelCache, particles[0], 0);
   updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
   updatePressureChartAxis(layout.chartHeights, model.pressure);
 
-  document.getElementById('equation-t').onchange = (e) => {
+  document.getElementById('equation-t').oninput = (e) => {
+    displacement_equations(model, modelCache, particles[0], e.target.value);
+  };
+  document.getElementById('equation-x').oninput = (e) => {
     displacement_equations(model, modelCache, particles[0], e.target.value);
   };
 }
 
-function newParticleSize(svg, particles, size) {
+function highlightedParticles(svg, particles, maxDisplacement, howMany) {
 
-  d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg)
-    .selectAll('.particle')
-    .data(particles)
-    .attr("r", size);
-
-}
-
-function highlightedParticles(svg, particles, size, maxDisplacement, howMany) {
-
-  let scaleFactor = 4;
+  // size of bigger particle size
+  // don't want too big - harder to see movement
+  let size = 5;
 
   let highlightedParticles = particles.slice(0, howMany);
 
@@ -31422,11 +31423,12 @@ function highlightedParticles(svg, particles, size, maxDisplacement, howMany) {
     .attr("stroke", "BLACK")
     .attr('stroke-width', 3);
 
+  // we change the y here so the bar doesn't overlap the particle
   displacement.merge(enterDisplacement)
     .attr("x1", d => d[0] - maxDisplacement)
-    .attr("y1", d => d[1] + size * scaleFactor)
+    .attr("y1", d => d[1] + size)
     .attr("x2", d => d[0] + maxDisplacement)
-    .attr("y2", d => d[1] + size * scaleFactor);
+    .attr("y2", d => d[1] + size);
 
   displacement
     .exit().remove();
@@ -31446,14 +31448,14 @@ function highlightedParticles(svg, particles, size, maxDisplacement, howMany) {
   highlightedParticleSelection.merge(enterHighlightedParticleSelection)
     .attr("cx", d => d[0])
     .attr("cy", d => d[1])
-    .attr("r", size * scaleFactor);
+    .attr("r", size);
 
   highlightedParticleSelection
     .exit().remove();
 
-  highlightedParticlesCurve(svg, highlightedParticles, 'highlightedParticlePressureCurve', size * scaleFactor);
+  highlightedParticlesCurve(svg, highlightedParticles, 'highlightedParticlePressureCurve', size);
 
-  highlightedParticlesCurve(svg, highlightedParticles, 'highlightedParticleDisplacementCurve', size * scaleFactor);
+  highlightedParticlesCurve(svg, highlightedParticles, 'highlightedParticleDisplacementCurve',size);
 
   return highlightedParticles;
 }
@@ -31470,22 +31472,6 @@ function newParticleNumber(svg, particles, requestedParticleNumber, bounds, size
   while (requestedParticleNumber < particles.length) {
     particles.pop();
   }
-
-  let particleSelection = d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg).selectAll('.particleLayer')
-    .selectAll('.particle')
-    .data(particles.slice(3));
-
-  particleSelection
-    .enter().append("circle")
-    .attr('class', 'particle')
-    .attr("stroke", "BLACK")
-    .attr("fill", "BLUE")
-    .attr("cx", d => d[0])
-    .attr("cy", d => d[1])
-    .attr("r", size);
-
-  particleSelection
-    .exit().remove();
 
   return particles;
 }
@@ -31541,18 +31527,19 @@ function meterScaleUpdate(svg, simWidth, particleArea) {
     .call(axis);
 }
 
-// time in seconds
+let startTime = performance.now();
+// time from performance.now that we start at (milliseconds)
 let t = 0;
 
 function update(svg, particles, modelCache, model, particleArea, speakerConeX, timestamp) {
-  t += 1;
+  //todo: profile putimagedata instead of drawing many rectangles
+  ctx.clearRect(0, 0, svg.getBoundingClientRect().width, svg.getBoundingClientRect().height);
+  t = (timestamp - startTime)/1000;
   updateSpeakerCone(svg, particleArea, modelCache, model);
   updateParticles(svg, particles, modelCache, model, speakerConeX);
   updatePressureCurve(svg, particles, modelCache, model);
   updateDisplacementCurve(svg, particles, modelCache, model);
-  // todo: account for time between calls
-  window.requestAnimationFrame((timestamp) => update(svg, particles, modelCache, model, particleArea, speakerConeX, timestamp))
-  // window.setTimeout(update, 50, svg, particles, modelCache, model, particleArea, speakerConeX)
+  window.requestAnimationFrame((newTimestamp) => update(svg, particles, modelCache, model, particleArea, speakerConeX, newTimestamp));
 }
 
 function updateSpeakerCone(svg, particleArea, modelCache, model) {
@@ -31596,11 +31583,13 @@ function updateDisplacementCurve(svg, particles, modelCache, model) {
     .selectAll('.highlightedParticleDisplacementCurve')
     .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + modelCache.displacementCurveYoffset);
 
-  let particleDisplacements = modelCache.sortedParticles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function)]);
+  let yOffSet = height - height*0.1 - 10 + height * 0.1 * 0.5;
 
-  d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg).select('#displacement-curve')
-    .datum(particleDisplacements)
-    .attr('d', d3__WEBPACK_IMPORTED_MODULE_0__["line"]());
+  let particleDisplacements = modelCache.sortedParticles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + yOffSet]);
+
+  for(let particle of particleDisplacements){
+    ctx.fillRect(Math.round(particle[0]), Math.round(particle[1]),modelCache.size,modelCache.size);
+  }
 }
 
 function updatePressureCurve(svg, particles, modelCache, model) {
@@ -31618,11 +31607,13 @@ function updatePressureCurve(svg, particles, modelCache, model) {
     .data(modelCache.highLightedParticles)
     .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + modelCache.pressureCurveYoffset);
 
-  let particleDisplacements = modelCache.sortedParticles.map(p => [p[0], yScale * displacementTransform(p[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function)]);
+  let yOffSet =  height * 0.1 * 0.5 + 10;
 
-  d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg).select('#pressure-curve')
-    .datum(particleDisplacements)
-    .attr('d', d3__WEBPACK_IMPORTED_MODULE_0__["line"]());//todo: don't make new line eveyr time?
+  let particleDisplacements = modelCache.sortedParticles.map(p =>[p[0], yScale * displacementTransform(p[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + yOffSet]);
+
+  for(let particle of particleDisplacements){
+    ctx.fillRect(Math.round(particle[0]), Math.round(particle[1]),modelCache.size,modelCache.size);
+  }
 }
 
 function displacementTransform(x, modelCache, phase, maxDisplacement, waveFunction) {
@@ -31638,18 +31629,14 @@ function displacementTransform(x, modelCache, phase, maxDisplacement, waveFuncti
 
 function updateParticles(svg, particles, modelCache, model, speakerConeX) {
 
-  let particleDisplacements = particles.map(p => [p[0] + displacementTransform(p[0], modelCache, 0, modelCache.maxDisplacement, model.waveform.function), p[0]]);
-  d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg)
-    .selectAll('.particle')
-    .data(particleDisplacements.slice(3))
-    .attr("cx", d => {
-      if (d[1] < speakerConeX + modelCache.maxDisplacement * 2 * modelCache.toCordsScaleFactor) {
-        //hide if too close to cone
-        return -10000;
-      } else {
-        return d[0];
-      }
-    });
+  let particleDisplacements = particles.map(p => [p[0] + displacementTransform(p[0], modelCache, 0, modelCache.maxDisplacement, model.waveform.function), p[1], p[0]]);
+  for(let particle of particleDisplacements){
+    //hide if it could penetrate speaker cone
+    let originalX = particle[2];
+    if (originalX > speakerConeX + modelCache.maxDisplacement * 2 * modelCache.toCordsScaleFactor) {
+      ctx.fillRect(Math.round(particle[0]), Math.round(particle[1]),modelCache.size,modelCache.size);
+    }
+  }
 
   d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg)
     .selectAll('.highlightedParticle')
@@ -31672,26 +31659,55 @@ function updateParticles(svg, particles, modelCache, model, speakerConeX) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "presets", function() { return presets; });
 let presets = {
-    "preset": "Default",
+    "preset": "Sin, Middle C, 196dB",
     "closed": false,
+    "default": "Clear wave bands",
     "remembered": {
-      "Default": {
+      "Sin, C7, 180dB": {
         "0": {
-          "particleNumber": 2000,
+          "freq": 2093,
+        }
+      },
+      "Sin, C8, 82dB": {
+        "0": {
+          "freq": 4186,
+        }
+      },
+      "Sin, C9, 82dB": {
+        "0": {
+          "freq": 8372,
+        }
+      },
+      "Sin, C10, 82dB": {
+        "0": {
+          "freq": 16744,
+        }
+      },
+      "Clear wave bands": {
+        "0": {
+          "particleNumber": 14410,
           "size": 1,
-          "widthUnit": "millimeters",
-          "width": 100,
-          "timeScale": 0.0001,
-          "freq": 261.63,
+          "timeScale": 20,
+          "freq": 10350,
           "speedOfSound": 343,
-          "maxDisplacementUnit": "millimeters",
-          "maxDisplacement": 500,
+          "maxDisplacement": 4800,
           "tone": "sin"
+        }
+      },
+      "Clear particles": {
+        "0": {
+          "particleNumber": 100,
+          "size": 3,
+          "timeScale": 40,
+          "freq": 9180,
+          "speedOfSound": 343,
+          "maxDisplacement": 2500,
         }
       }
     },
     "folders": {}
-}
+  }
+
 
 /***/ }),
 

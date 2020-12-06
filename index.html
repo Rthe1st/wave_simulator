@@ -21,20 +21,34 @@
 
 <body>
     <h1>Sound wave particle simulator</h1>
-    <svg id='diagram' style="display:block;width: 100%;height:25em;"></svg>
+    <div id="container">
+        <svg id='diagram'></svg>
+        <canvas id="canvas" width="100%"></canvas>
+    </div>
+    <h2>Equations</h2>
     <div id="part1">
         <div id="displacement-explanation">
-            <h2>Displacement of a particle</h2>
-            <input type="range" min="1" max="100" value="50" id="equation-t">
+            <h3>Displacement of a particle</h3>
+            <!--todo:this should range from 0 to (time it take wave to cycle once-->
+            <label>Time (us): 0<input type="range" min="1" max="100" value="1" id="equation-t"></label>100
+            <!-- todo: should we draw this particle somewhere?-->
+            <label>X (m): 0<input type="range" min="0" max="100" value="1" id="equation-x"></label>100
             <p id="displacement-equations"></p>
         </div>
         <div id="pressure-explanation">
-            <h2>Max Pressure</h2>
+            <h3>Max Pressure</h3>
             <p id="pressure-equations"></p>
-            <h2>Loudness</h2>
+            <h3>Loudness</h3>
             <p id="loudness-equations"></p>
         </div>
     </div>
+    <h3>Derived properties</h3>
+    <ul>
+        <li id="pressure"></li>
+        <li id="sound-pressure-level"></li>
+        <li id="wave-length"></li>
+        <li id="acoustic-impedance"></li>
+    </ul>
     <h2>Glossary</h2>
     <ul>
         <li>$A$: Amplitude, this is the maximum displacement the vibrating source (and so the maximum displacement of particles it's vibration is propagated to).</li>
@@ -44,13 +58,24 @@
         <li>$w$:The angular frequency of the wave, describing how many oscillations it completes per second, and related to frequency by the equation $w=2 \pi f$. We measure it in radians per second.</li>
         <li>$t$: Time in seconds since the source started vibrating.</li>
     </ul>
-    <h3>Derived properties</h3>
+    <h2>Explanation</h2>
+    Put a brief one here - if more details needed, link to a new page
+    <h2>Limitations of the model</h2>
     <ul>
-        <li id="pressure"></li>
-        <li id="sound-pressure-level"></li>
-        <li id="wave-length"></li>
-        <li id="acoustic-impedance"></li>
-    </ul>
+        <li>When a setting is changed, we draw the model as if the wave has already had time to propergate all the way from the source (left) to the reciever (right). In reality, if you change a property of the source (it's displacement or frequency of vibration), depending of the speed of sound, it would take time for the new wave to propergate forwards - it would look like the new wave was chasing the old wave left to right</li>
+        <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
+    <ul>
+    <h2>How to use the model</h2>
+    <p>
+        To see emergent wave behaviour
+        * wave length must be about the same order of magitude as the width
+        * at 20kHz, wavelength is 17mm - so you can never seen wave effects at a zoom of more then 10mm or so
+        17m at 20hz, so zoom out to 10meter or so
+        but you also need to make sure displacement is large enough to see movement
+
+
+
+    </p>
     <h2>Explanation</h2>
     The sound above is being emitted by a source vibrating on the left hand side, and heard by an listener (or their
     eardrum) on the right.
