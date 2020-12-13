@@ -42,21 +42,20 @@
             <p id="loudness-equations"></p>
         </div>
     </div>
-    <h3>Derived properties</h3>
-    <ul>
-        <li id="pressure"></li>
-        <li id="sound-pressure-level"></li>
-        <li id="wave-length"></li>
-        <li id="acoustic-impedance"></li>
-    </ul>
     <h2>Glossary</h2>
     <ul>
         <li>$A$: Amplitude, this is the maximum displacement the vibrating source (and so the maximum displacement of particles it's vibration is propagated to).</li>
+        <!-- todo: should I highlight more was a wave cycle is?
+        'if you look at a given point, it's the time it takes that point to cycle from position X of the wave back to position X.'-->
+        <li>$f$: Frequency, these means 2 things. At a particle level this is how many times the particle cycles/oscillates per second. At a sound wave level it's how many times the wave cycles per second. That's not a coincidence, the wave frequency is an emergent property of the particle frequency.</li>
+        <li>$v$: Speed of sound in the medium. Our particles are vibrating in a medium (air). Properties like density affect how fast waves can propergate through it - largly indepentant of particle behaviour.</li>
+        <li>$\lambda$: Wave length - the physical space covered by a single wave cycle, or equivilnetly, the phycial distance between 2 points in the wave cycle. You can see this in the simulation as the distance between peaks/troughs of pressure.</li>
         <li>$k$: The spatial angular frequency of the wave, describing how many oscillations it completes per meter, and related to the wavelength by the equation $k = 2 \pi / λ$. We measure it in radians per meter.</li>
         <li>$x$: The initial distance of a particle from the sound source before it's started vibrating. It's displacement while vibrating is relative to this point.</li>
         <!--todo: add an extra section explain the roll of k and w in the formulae, and how they account for the position of x offset by time and space-->
         <li>$w$:The angular frequency of the wave, describing how many oscillations it completes per second, and related to frequency by the equation $w=2 \pi f$. We measure it in radians per second.</li>
         <li>$t$: Time in seconds since the source started vibrating.</li>
+        <li>$F$: A function representing the particles movement. It takes an angle representing wear in the current wave cycle the particle is, and maps that to a distance from it's origin. The output is normalized between -1 and 1 so we have to times by $A$ to find the real distance in meters.</li>
     </ul>
     <h2>Explanation</h2>
     Put a brief one here - if more details needed, link to a new page
@@ -64,7 +63,7 @@
     <ul>
         <li>When a setting is changed, we draw the model as if the wave has already had time to propergate all the way from the source (left) to the reciever (right). In reality, if you change a property of the source (it's displacement or frequency of vibration), depending of the speed of sound, it would take time for the new wave to propergate forwards - it would look like the new wave was chasing the old wave left to right</li>
         <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
-    <ul>
+    </ul>
     <h2>How to use the model</h2>
     <p>
         To see emergent wave behaviour

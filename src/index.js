@@ -166,10 +166,7 @@ function cache(modelCache, model, svgWidth) {
 
   let pressure = maxPressure(model, modelCache);
   model.pressure = pressure;
-  let spl = pressureToSpl(pressure, model.waveform.rms);
-  document.getElementById('sound-pressure-level').innerText = `Sound Pressure Level (dB): ${spl}`
 
-  document.getElementById('wave-length').innerText = `Wave length (m): ${modelCache.waveLength}`;
   pressureEquations(model, modelCache);
   loudnessEquations(model, modelCache);
   return modelCache;
@@ -225,7 +222,7 @@ $$p=AZ_0w=${formatSiPrefix(modelCache.maxDisplacement, "m")}${formatSiPrefix(mod
 function loudnessEquations(model, modelCache) {
   let referencePressure = 20 * 0.000001;
   let pressureRMS = model.pressure * model.waveform.rms;
-  let spl = 20 * Math.log10(pressureRMS / referencePressure);
+  let spl = pressureToSpl(model.pressure, model.waveform.rms);
   let template = `
   $$p_0=${formatSiPrefix(referencePressure, "pa")}$$
   $\${SPL} = 20{log}_{10}(\\frac{p}{p_0})=20{log}_{10}(\\frac{${formatSiPrefix(pressureRMS, "pa")}}{${formatSiPrefix(referencePressure, "pa")}})=${formatSiPrefix(spl, "dB")}$$
@@ -256,18 +253,20 @@ window.onload = function () {
   canvas.height = document.getElementById("diagram").getBoundingClientRect().height;
   ctx = document.getElementById("canvas").getContext('2d');
 
+  //todo: set this = to presets[clear wave]
+  // as dat gui doesn't seem to load default
   let model = {
     widthUnit: "micrometers",
     width: 100000,
     timeUnit: "micrometers",
     timeScale: 10,
-    freq: 2000,
+    freq: 10350,
     //todo: consider making this a dropdown
     // of speed of sound at specific temperatures/materials
     speedOfSound: 343,
     particleNumber: 5010,
     maxDisplacementUnit: "micrometers",
-    maxDisplacement: 500,
+    maxDisplacement: 4800,
     size: 1,
     tone: 'sin',
     waveform: waveforms['sin'],

@@ -1,19 +1,15 @@
 todo:
-label everything
-add unit ranges for simwidth and max displacement (and time)
-    micro, nano, milli, etc
-    as a hack for exponetial ranges
-add a time slides for displacement of particle equation
-    also update that equation when input values change
-label the max displacement bars
-more presets
-better axis labels (include units on the ticks?)
-warn when animation speed to fast for particles
-    leading to misleading animation
-allow better time range scaling
-try work out how to show (or at least explain why not) quite noises at low freq
-at som epresets that just show waves property relationships nicely
-    even if they arnt close to real worl noises
-generay document what ranges diagrams work well in
-
+make the axis ranges for pressure/displacments graphs set size (max and min of sim domainm)
+    but also make them exponential
+consider dashed lines to link particles in sim to their particle in top/bottom graphs
+consider removing units from equations
+write up html sections
+make equation x range same as sim width
+make equation t range same as wave period (so you can see values for 1 whole wave cycle)
+condier showing where the equations X would be in the sim
+    cosnider ability to set sim time to equation time (with sim paused)
+    or making a 'one particle' diagram just for the equation
+add pause sim button
+fix defalt (nt koadingf preset)
+label wave lenght on sim (arrow between 2 points, dones;t need to be animated)
 stretch: play the sounds
