@@ -160,7 +160,6 @@ function cache(modelCache, model, svgWidth) {
   modelCache.waveLength = model.speedOfSound / model.freq;
   // cycles per meter, angular freq
   modelCache.k = 2 * Math.PI / modelCache.waveLength;
-  modelCache.wTimeScale = modelCache.w * modelCache.timeScale;
   modelCache.toMetersScaleFactor = modelCache.simWidth / svgWidth;
   modelCache.toCordsScaleFactor = svgWidth / modelCache.simWidth;
 
@@ -256,6 +255,7 @@ window.onload = function () {
   //todo: set this = to presets[clear wave]
   // as dat gui doesn't seem to load default
   let model = {
+    pause: false,
     widthUnit: "micrometers",
     width: 100000,
     timeUnit: "micrometers",
@@ -308,6 +308,8 @@ window.onload = function () {
   modelCache.size = model.size;
   modelCache = cache(modelCache, model, svgDim.width);
 
+  gui.add(model, 'pause');
+
   gui.add(model, 'particleNumber', 10, 15010, 10)
     .onChange(() => {
       particles = newParticleNumber(svg, particles, model.particleNumber, particleArea, model.size);
@@ -326,34 +328,6 @@ window.onload = function () {
       modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     });
 
-  // gui.add(model, 'widthUnit', ["micrometers"])
-  //   .onChange((value) => {
-  //     modelCache.simWidth = unitToScalingFactor(value) * model.width;
-  //     meterScaleUpdate(svg, modelCache.simWidth, particleArea);
-  //     modelCache = cache(modelCache, model, svgDim.width);
-  //     updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
-  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-  //   });
-
-
-  // gui.add(model, 'width', 100000, 100000)
-  //   .onChange(() => {
-  //     modelCache.simWidth = unitToScalingFactor(model.widthUnit) * model.width;
-  //     meterScaleUpdate(svg, modelCache.simWidth, particleArea);
-  //     modelCache = cache(modelCache, model, svgDim.width);
-  //     updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
-  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-  //   });
-
-    // gui.add(model, 'timeUnit', ["micrometers"])
-    // .onChange((value) => {
-    //   modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
-    //   modelCache = cache(modelCache, model, svgDim.width);
-    // });
-
-  //todo: make steps better (bigger steps at bigger values)
-  // or one of N fixed speeds
-  // if you let this get big (0.2101) wave starts going backwards, why?
   gui.add(model, 'timeScale', 10, 500, 10)
     .onChange((value) => {
       modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
@@ -374,16 +348,6 @@ window.onload = function () {
       updatePressureChartAxis(layout.chartHeights, model.pressure);
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
-
-  // gui.add(model, 'maxDisplacementUnit', ["micrometers"])
-  //   .onChange((value) => {
-  //     modelCache.maxDisplacement = unitToScalingFactor(value) * model.maxDisplacement;
-  //     modelCache = cache(modelCache, model, svgDim.width);
-  //     updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
-  //     updatePressureChartAxis(layout.chartHeights, model.pressure);
-  //     modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
-  //     displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
-  //   });
 
   gui.add(model, 'maxDisplacement', 100, 10000, 100)
     .onChange(() => {
@@ -546,12 +510,16 @@ function meterScaleUpdate(svg, simWidth, particleArea) {
 
 let startTime = performance.now();
 // time from performance.now that we start at (milliseconds)
-let t = 0;
+let lastTimestamp = startTime;
+let t = startTime / 1000;
 
 function update(svg, particles, modelCache, model, particleArea, speakerConeX, timestamp) {
   //todo: profile putimagedata instead of drawing many rectangles
   ctx.clearRect(0, 0, svg.getBoundingClientRect().width, svg.getBoundingClientRect().height);
-  t = (timestamp - startTime)/1000;
+  if (!model.pause) {
+    t += (timestamp - lastTimestamp) * modelCache.timeScale / 1000;
+  }
+  lastTimestamp = timestamp;
   updateSpeakerCone(svg, particleArea, modelCache, model);
   updateParticles(svg, particles, modelCache, model, speakerConeX);
   updatePressureCurve(svg, particles, modelCache, model);
@@ -640,7 +608,7 @@ function displacementTransform(x, modelCache, phase, maxDisplacement, waveFuncti
 
   let A = maxDisplacement;
   // todo: cache this across particles: modelCache.wTimeScale * t
-  let displacementInMeters = (A * waveFunction((modelCache.wTimeScale * t) - (modelCache.k * xInMeters) + phase));
+  let displacementInMeters = (A * waveFunction((modelCache.w * t) - (modelCache.k * xInMeters) + phase));
   return displacementInMeters * modelCache.toCordsScaleFactor;
 }
 

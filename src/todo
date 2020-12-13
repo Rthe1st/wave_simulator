@@ -9,7 +9,6 @@ make equation t range same as wave period (so you can see values for 1 whole wav
 condier showing where the equations X would be in the sim
     cosnider ability to set sim time to equation time (with sim paused)
     or making a 'one particle' diagram just for the equation
-add pause sim button
 fix defalt (nt koadingf preset)
 label wave lenght on sim (arrow between 2 points, dones;t need to be animated)
 stretch: play the sounds
