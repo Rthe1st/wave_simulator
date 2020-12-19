@@ -31169,11 +31169,35 @@ function maxPressure(model, modelCache) {
   return pressure;
 }
 
+function drawManualParticle(currentX, originalX){
+  let svg = document.getElementById('diagram');
+  let highlightedParticleSelection = d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg)
+  .selectAll('.manual-particle')
+  .datum([currentX, originalX]);
+  console.log(originalX);
+//todo: dont use red/green - colorblind people!
+let enterHighlightedParticleSelection = highlightedParticleSelection
+  .enter().append("circle")
+  .attr('class', '.manual-particle')
+  .attr("stroke", "BLACK")
+  .attr("fill", "GREEN");
+
+highlightedParticleSelection.merge(enterHighlightedParticleSelection)
+  .attr("cx", d => 50)
+  .attr("cy", d => 100)
+  .attr("r", 50);
+
+highlightedParticleSelection
+  .exit().remove();
+
+}
+
 function displacement_equations(model, modelCache, particle, time) {
   //todo: need to map model.tone==sin to cos
   //todo: explain how k and w account for wave position
   // explain k is https://en.wikipedia.org/wiki/Spatial_frequency
-  let x = document.getElementById('equation-x').value * modelCache.toMetersScaleFactor;
+  // 0.001 because equationx is in mm
+  let x = document.getElementById('equation-x').value * 0.001 * modelCache.toMetersScaleFactor;
   let displacement = modelCache.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * time*0.000001);
   let template = `
   $$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, f=${formatSiPrefix(model.freq, "{Hz}")}, t=${formatSiPrefix(time, "s")}, x=${formatSiPrefix(x, "m")}, v=${formatSiPrefix(model.speedOfSound, "{m/s}")}$$
@@ -31186,6 +31210,7 @@ function displacement_equations(model, modelCache, particle, time) {
   let element = document.getElementById("displacement-equations");
   element.innerText = template;
   MathJax.typeset([element]);
+  drawManualParticle((x + displacement)*modelCache.toCordsScaleFactor, x*modelCache.toCordsScaleFactor);
 }
 
 function pressureEquations(model, modelCache) {
@@ -31341,7 +31366,7 @@ window.onload = function () {
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
-  gui.add(model, 'tone').options(['sin', 'triangle', 'square'])
+  gui.add(model, 'tone').options(['sin', 'triangle', 'square', 'piano'])
     .onChange((tone) => {
       model.waveform = _waveforms__WEBPACK_IMPORTED_MODULE_2__["waveforms"][tone];
       loudnessEquations(model, modelCache);
@@ -31453,7 +31478,7 @@ function waveLengthScale(svg, particleArea) {
 }
 
 function updateWaveLengthScale(svg, simWidth, particleArea, modelCache) {
-  let absDomainRange = simWidth / modelCache.waveLength;
+  let absDomainRange = simWidth *0.8 / modelCache.waveLength;
   //keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
   // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = absDomainRange * 0.1;
@@ -31478,6 +31503,7 @@ function metersScale(svg, particleArea) {
 }
 
 function meterScaleUpdate(svg, simWidth, particleArea) {
+  simWidth = simWidth * 0.8;
   // keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
   // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = simWidth * 0.1;
@@ -31707,6 +31733,11 @@ let waveforms = {
         function: triangle,
         rms: 1/Math.sqrt(3),
     },
+    piano: {
+        equationName: 'piano',
+        function: piano,
+        rms: 1/Math.sqrt(3),
+    },
 };
 
 function square(radians) {
@@ -31731,6 +31762,15 @@ function triangle(radians) {
     } else {
         return -(1 - percentOfCycle);
     }
+}
+
+let pianoData = [0.2662, 0.2699, 0.25, 0.2091, 0.1577, 0.1105, 0.0772, 0.0579, 0.0484, 0.0399, 0.0323, 0.0262, 0.0296, 0.0405, 0.0536, 0.0589, 0.0501, 0.0316, 0.0131, -0.0013, -0.0227, -0.0566, -0.1026, -0.1512, -0.1933, -0.2151, -0.2073, -0.1796, -0.1525, -0.1447, -0.1599, -0.1912, -0.2259, -0.253, -0.2692, -0.2778, -0.286, -0.2924, -0.2998, -0.3079, -0.3178, -0.3256, -0.3242, -0.3171, -0.318, -0.3333, -0.3538, -0.3675, -0.3698, -0.3539, -0.3196, -0.2732, -0.234, -0.2236, -0.2469, -0.2935, -0.346, -0.3943, -0.4325, -0.4452, -0.4236, -0.3685, -0.2976, -0.227, -0.1627, -0.0966, -0.0202, 0.0638, 0.1363, 0.179, 0.1831, 0.1575, 0.1305, 0.1322, 0.1799, 0.2623, 0.3507, 0.4195, 0.4595, 0.4829, 0.5033, 0.5247, 0.5386, 0.5337, 0.5065, 0.4659, 0.4239, 0.3881, 0.3587, 0.3329, 0.3161, 0.3045, 0.2892, 0.2577, 0.2122, 0.1606, 0.102, 0.0394, -0.0238, -0.0896, -0.1555, -0.2123, -0.2411, -0.2297, -0.1925, -0.1492, -0.1152, -0.098, -0.1001, -0.118, -0.138, -0.1558, -0.1724, -0.1968, -0.2357, -0.2826, -0.3332, -0.3874, -0.4433, -0.4879, -0.5083, -0.5032, -0.4883, -0.4824, -0.4963, -0.5309, -0.5686, -0.5827, -0.5522, -0.4812, -0.3888, -0.2965, -0.2122, -0.1327, -0.0549, 0.0188, 0.0827, 0.1368, 0.1793, 0.2084, 0.2257, 0.2433, 0.2772, 0.3391, 0.4281, 0.5275, 0.6163, 0.6768, 0.7075, 0.7171, 0.7223, 0.7358, 0.754, 0.754, 0.7165, 0.6522, 0.5932, 0.5702, 0.59, 0.6408, 0.6992, 0.7355, 0.7261, 0.6688, 0.5787, 0.4762, 0.3756, 0.2847, 0.2077, 0.1401, 0.083, 0.0354, -0.0046, -0.0293, -0.0358, -0.0281, -0.0177, -0.018, -0.0402, -0.0905, -0.1623, -0.2451, -0.3286, -0.4066, -0.4649, -0.4947, -0.4997, -0.4947, -0.4893, -0.4813, -0.4612, -0.4234, -0.3784, -0.3438, -0.33, -0.3319, -0.3402, -0.3407, -0.3241, -0.2929, -0.264, -0.2524, -0.253, -0.2421, -0.1947, -0.1128, -0.0105, 0.0815, 0.1342, 0.1378, 0.0993, 0.0446, -0.0027, -0.0243, -0.0205, 0.0029, 0.0373, 0.0745, 0.1062, 0.1301, 0.1509, 0.1639, 0.158, 0.1213, 0.057, -0.027, -0.1099, -0.1697, -0.1936, -0.1824, -0.1453, -0.0839, -0.0131, 0.0471, 0.0843, 0.1001, 0.1061, 0.1089, 0.1108, 0.1066, 0.0971, 0.0836, 0.0664, 0.0465, 0.0355, 0.0454, 0.0745, 0.1108, 0.1503, 0.1998, 0.2536, 0.2958, 0.3131, 0.3068, 0.2817, 0.2423, 0.1931, 0.1386, 0.0918, 0.0651, 0.0632, 0.072, 0.0685, 0.0323, -0.0382, -0.1233, -0.1978, -0.2477, -0.2762, -0.2899, -0.2976, -0.3099, -0.3316, -0.3556, -0.3717, -0.3859, -0.4053, -0.4323, -0.4674, -0.5144, -0.5719, -0.6283, -0.6696, -0.682, -0.6582, -0.5972, -0.5107, -0.4172, -0.3348, -0.2699, -0.225, -0.1973, -0.1867, -0.1925, -0.2067, -0.2153, -0.2026, -0.1732, -0.1356, -0.0957, -0.0556, -0.0106, 0.0461, 0.1138, 0.1848, 0.2521, 0.311, 0.3619, 0.4039, 0.4353, 0.453, 0.4626, 0.4777, 0.5157, 0.5871, 0.6809, 0.7688, 0.8171, 0.8029, 0.7283, 0.6172, 0.4999, 0.4004, 0.3346, 0.3039, 0.3028, 0.3222, 0.3553, 0.3895, 0.4098, 0.4021, 0.3692, 0.3227, 0.2716, 0.2208, 0.1682, 0.1076, 0.0405, -0.0272, -0.0859, -0.1274, -0.146, -0.1421, -0.1233, -0.1017, -0.0859, -0.0837, -0.1036, -0.1478, -0.2046, -0.2605, -0.3102, -0.3547, -0.3961, -0.4295, -0.4466, -0.4434, -0.4249, -0.4051, -0.39, -0.3738, -0.3474, -0.2991, -0.2267, -0.1336, -0.0361, 0.0535, 0.1255, 0.1802, 0.2237, 0.267, 0.3054, 0.3287, 0.3328, 0.3292, 0.3302, 0.3375, 0.3494, 0.369, 0.3985, 0.4371, 0.478, 0.5154, 0.5475, 0.5735, 0.5861, 0.5765, 0.5372, 0.4627, 0.3578, 0.2386, 0.1268, 0.0429, -0.0103, -0.0446, -0.0648, -0.0752, -0.074, -0.0629, -0.0494, -0.0427, -0.0476, -0.0554, -0.0609, -0.0579, -0.0408, -0.0163, 0.0085, 0.0293, 0.0479, 0.0715, 0.1021, 0.1295, 0.1382, 0.1219, 0.0933, 0.07, 0.0635, 0.0717, 0.0891, 0.1182, 0.1609, 0.2156, 0.2724, 0.3252, 0.3713, 0.4082, 0.4264, 0.4151, 0.3712, 0.297, 0.2032, 0.1033, 0.0133, -0.0644, -0.1314, -0.1994, -0.2692, -0.3307, -0.3686, -0.3677, -0.3317, -0.2856, -0.2597, -0.2729, -0.3241, -0.401, -0.49, -0.5818, -0.6737, -0.7626, -0.8359, -0.8785, -0.8785, -0.8481, -0.8103, -0.7837, -0.7681, -0.7466, -0.7046, -0.6391, -0.5685, -0.5079, -0.4586, -0.4108, -0.3546, -0.291, -0.2289, -0.1757, -0.1335, -0.0972, -0.06, -0.0276, -0.0096, -0.0137, -0.0346, -0.0576, -0.0656, -0.0449, 0.0126, 0.1076, 0.2253, 0.3409, 0.4273, 0.469, 0.4641, 0.4239, 0.3687, 0.3194, 0.2844, 0.2574, 0.2277, 0.1889, 0.1458, 0.1112, 0.0918, 0.0825, 0.0647, 0.0303, -0.0172];
+
+function piano(radians){
+    let percentOfCycle = (radians % (Math.PI/2))/(Math.PI/2);
+    let numberOfSamples = pianoData.length;
+    let chosenSample = Math.round(percentOfCycle*numberOfSamples);
+    return pianoData[chosenSample];
 }
 
 

@@ -187,11 +187,35 @@ function maxPressure(model, modelCache) {
   return pressure;
 }
 
+function drawManualParticle(currentX, originalX){
+  let svg = document.getElementById('diagram');
+  let highlightedParticleSelection = d3.select(svg)
+  .selectAll('.manual-particle')
+  .datum([currentX, originalX]);
+  console.log(originalX);
+//todo: dont use red/green - colorblind people!
+let enterHighlightedParticleSelection = highlightedParticleSelection
+  .enter().append("circle")
+  .attr('class', '.manual-particle')
+  .attr("stroke", "BLACK")
+  .attr("fill", "GREEN");
+
+highlightedParticleSelection.merge(enterHighlightedParticleSelection)
+  .attr("cx", d => 50)
+  .attr("cy", d => 100)
+  .attr("r", 50);
+
+highlightedParticleSelection
+  .exit().remove();
+
+}
+
 function displacement_equations(model, modelCache, particle, time) {
   //todo: need to map model.tone==sin to cos
   //todo: explain how k and w account for wave position
   // explain k is https://en.wikipedia.org/wiki/Spatial_frequency
-  let x = document.getElementById('equation-x').value * modelCache.toMetersScaleFactor;
+  // 0.001 because equationx is in mm
+  let x = document.getElementById('equation-x').value * 0.001 * modelCache.toMetersScaleFactor;
   let displacement = modelCache.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * time*0.000001);
   let template = `
   $$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, f=${formatSiPrefix(model.freq, "{Hz}")}, t=${formatSiPrefix(time, "s")}, x=${formatSiPrefix(x, "m")}, v=${formatSiPrefix(model.speedOfSound, "{m/s}")}$$
@@ -204,6 +228,7 @@ function displacement_equations(model, modelCache, particle, time) {
   let element = document.getElementById("displacement-equations");
   element.innerText = template;
   MathJax.typeset([element]);
+  drawManualParticle((x + displacement)*modelCache.toCordsScaleFactor, x*modelCache.toCordsScaleFactor);
 }
 
 function pressureEquations(model, modelCache) {
@@ -359,7 +384,7 @@ window.onload = function () {
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
-  gui.add(model, 'tone').options(['sin', 'triangle', 'square'])
+  gui.add(model, 'tone').options(['sin', 'triangle', 'square', 'piano'])
     .onChange((tone) => {
       model.waveform = waveforms[tone];
       loudnessEquations(model, modelCache);
@@ -471,7 +496,7 @@ function waveLengthScale(svg, particleArea) {
 }
 
 function updateWaveLengthScale(svg, simWidth, particleArea, modelCache) {
-  let absDomainRange = simWidth / modelCache.waveLength;
+  let absDomainRange = simWidth *0.8 / modelCache.waveLength;
   //keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
   // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = absDomainRange * 0.1;
@@ -496,6 +521,7 @@ function metersScale(svg, particleArea) {
 }
 
 function meterScaleUpdate(svg, simWidth, particleArea) {
+  simWidth = simWidth * 0.8;
   // keep in sync with the speakerConeX (left bound of particle area where we start to draw particles)
   // which is linked to max displacement so they don't move off left of screen
   let domainBelow0 = simWidth * 0.1;

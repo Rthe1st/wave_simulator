@@ -25,175 +25,88 @@
         <svg id='diagram'></svg>
         <canvas id="canvas" width="100%"></canvas>
     </div>
-    <h2>Equations</h2>
-    <div id="part1">
-        <div id="displacement-explanation">
-            <h3>Displacement of a particle</h3>
-            <!--todo:this should range from 0 to (time it take wave to cycle once-->
-            <label>Time (us): 0<input type="range" min="1" max="100" value="1" id="equation-t"></label>100
-            <!-- todo: should we draw this particle somewhere?-->
-            <label>X (m): 0<input type="range" min="0" max="100" value="1" id="equation-x"></label>100
-            <p id="displacement-equations"></p>
-        </div>
-        <div id="pressure-explanation">
-            <h3>Max Pressure</h3>
-            <p id="pressure-equations"></p>
-            <h3>Loudness</h3>
-            <p id="loudness-equations"></p>
-        </div>
-    </div>
-    <h2>Glossary</h2>
-    <ul>
-        <li>$A$: Amplitude, this is the maximum displacement the vibrating source (and so the maximum displacement of particles it's vibration is propagated to).</li>
-        <!-- todo: should I highlight more was a wave cycle is?
-        'if you look at a given point, it's the time it takes that point to cycle from position X of the wave back to position X.'-->
-        <li>$f$: Frequency, these means 2 things. At a particle level this is how many times the particle cycles/oscillates per second. At a sound wave level it's how many times the wave cycles per second. That's not a coincidence, the wave frequency is an emergent property of the particle frequency.</li>
-        <li>$v$: Speed of sound in the medium. Our particles are vibrating in a medium (air). Properties like density affect how fast waves can propergate through it - largly indepentant of particle behaviour.</li>
-        <li>$\lambda$: Wave length - the physical space covered by a single wave cycle, or equivilnetly, the phycial distance between 2 points in the wave cycle. You can see this in the simulation as the distance between peaks/troughs of pressure.</li>
-        <li>$k$: The spatial angular frequency of the wave, describing how many oscillations it completes per meter, and related to the wavelength by the equation $k = 2 \pi / λ$. We measure it in radians per meter.</li>
-        <li>$x$: The initial distance of a particle from the sound source before it's started vibrating. It's displacement while vibrating is relative to this point.</li>
-        <!--todo: add an extra section explain the roll of k and w in the formulae, and how they account for the position of x offset by time and space-->
-        <li>$w$:The angular frequency of the wave, describing how many oscillations it completes per second, and related to frequency by the equation $w=2 \pi f$. We measure it in radians per second.</li>
-        <li>$t$: Time in seconds since the source started vibrating.</li>
-        <li>$F$: A function representing the particles movement. It takes an angle representing wear in the current wave cycle the particle is, and maps that to a distance from it's origin. The output is normalized between -1 and 1 so we have to times by $A$ to find the real distance in meters.</li>
-    </ul>
-    <h2>Explanation</h2>
-    Put a brief one here - if more details needed, link to a new page
-    <h2>Limitations of the model</h2>
-    <ul>
-        <li>When a setting is changed, we draw the model as if the wave has already had time to propergate all the way from the source (left) to the reciever (right). In reality, if you change a property of the source (it's displacement or frequency of vibration), depending of the speed of sound, it would take time for the new wave to propergate forwards - it would look like the new wave was chasing the old wave left to right</li>
-        <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
-    </ul>
-    <h2>How to use the model</h2>
-    <p>
-        To see emergent wave behaviour
-        * wave length must be about the same order of magitude as the width
-        * at 20kHz, wavelength is 17mm - so you can never seen wave effects at a zoom of more then 10mm or so
-        17m at 20hz, so zoom out to 10meter or so
-        but you also need to make sure displacement is large enough to see movement
-
-
-
-    </p>
-    <h2>Explanation</h2>
-    The sound above is being emitted by a source vibrating on the left hand side, and heard by an listener (or their
-    eardrum) on the right.
-    Because we simulate a constant tone, it's closest to emulating a speaker playing a constant tone. But if you imagine
-    a different amplitude envelope, changing tone, etc it could just as well be a guitar, voice box, table some one
-    banged, etc.
-    This simulation is one dimensional - we only consider the object vibrating towards and away from the listener - in
-    reality this all takes place in 3 dimensions.
-    The wave being simulated essentially causes the eardrum to replicate the vibration of the source.
-    <h3>How do sound waves move?</h3>
-    <p>
-        When an object vibrates it moves rapidly back and forth.
-        When it moves forwards, it pushes the air molecules in front of it forwards, causing an increase in air
-        pressure. And when it moves away, it leaves extra space for the molecules to diffuse into, causing a decrease in
-        air pressure as they move backwards into it.
-        If you imagine the air between source and listener as slices of air, this pushing and pulling of the layer
-        directly in front of the source has a knock on effect of pushing/pulling the second layer in front of it.
-        This continues forward, with each layer of air causing the one in front to vibrate, propergating the vibration
-        of the source forwards towards the listener.
-        Eventualy the layer of air directly in front of the eardrum will beging to vibrate, pushing against the eardrum
-        and making it vibrate as well - which is what our brain then interprets as sound.
-
-        Thus, without any net movement in molecules, a wave of air pressure travels from a vibrating object to your ear.
-
-
-        //discuss air particles
-
-        When the initial object vibrates in a repeat motion - moving forward and backward at a constant rate, it causes
-        a predicable cycle in the chances of air pressure, low to high to low again. This is what we characterize as a
-        wave.
-    </p>
-    <h4>Modeling as particles, not molecules</h4>
-    <p>The dots you see in the simulation above represent air particles - not molecules.
-        //todo: explain the difference
-    </p>
-    <h3>Characteristics of a sound wave</h3>
-    How does the above description relate to the qualities of sound we know?
-    Frequency - in hertz (hz), the number of wave cycles per second
-    In the simulation above, one cycle is from one band of high pressure to the next.
-    //todo: explain how this relates to proerties we see
-    tone - the shape of the pressure cycle
-    This is how air pressure at a given point changes over time.
-    If you plot this on a graph, you see the familar soundwave patterns (sin, triangle, etc)
-    Amplitude - the amount of pressure change relative to the ambiant pressure
-    How many air molecules are pushed into the high pressure bands relative to normal
-    The bigger the distance an object vibrates back and forht, the more air molecules it pushes, leading to higher
-    pressure (and lower pressure when it moves back).
-    <h3>How do Frequency, tone, Amplitude relate to the simulation?</h3>
-    It's directly related to the movement of the emiting object when vibrating, and therefor the movement of air
-    particles.
-    The formuale for a air particles displacement is:
-    $${displacement}=A \cos (k x - wt)$$
-    Where:
-    <ul>
-        <li>
-            $A$ is how far the particle is pushed forwarded by high pressure behind it (and pushed backwards by high
-            pressure in front of it).
-            // todo: how does this relate to sound pressure
-        </li>
-        <li> $k$ is wave cycles per meter. If you pause the simulation above, it's the number of high pressure areas
-            within a 1 meter distance.
-            In radian, $k=2\pi/{waveLength}$
-        </li>
-        <li>
-            $x$ is the particle's distance from the wave source, which determines which point in the wave cycle the
-            particle is at at a given instant.
-        </li>
-        <li>
-            $w$ is wave cycles per second (the time equivilent to k)
-            In radians $w=2\pi{f}$, where $f$ is frequency
-        </li>
-        <li> $t$ is the time since the sound starting vibrating.</li>
-    </ul>
-    ${waveLength}$ is $v/f$, where $f$ is frequency and $v$ is the speed of sound in the vibrating medium (speed that
-    the vibrations propergate at). For air at $20^\circ C$, $v=343m/s$. This isn't modeled in the simulation because
-    it's depends on molecules - not particles.
-
-    Sources:
-    https://en.wikipedia.org/wiki/Wave_vector
-    https://en.wikipedia.org/wiki/Particle_displacement
-    https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html
-    <h3>Soundpressure</h3>
-    k is cycles per meter in x direction
-
-    given by $$p = v \rho c_2 k_x/w$$
-    Particle_displacement meters = 0.1m
-    density = 1.203 kg/m3
-    c = 343m/s
-    m * (kg/m3) * (m^2)/s^2 = kg/s^2
-    we're missing a /m (per meter) to make units match pressure
-    is that what k_x is? Try assuming it's 1, what values to we get?
-    compare to known value of sound pressure
-    = pa = N/m^2 = (kg*m/s^2)/m^2 = kg/s^2*m
-    $$p = {displacement} \rho c_2 k_x$$
-    $$p = 0.1 * 1.203 * 343^2$$ = 14152pa, that is quite loud, accouding to
-    https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure
-
-
-    try tis: https://physics.stackexchange.com/a/110131
-
-
-    where
-    <ul>
-        <li>p is the acoustic pressure in the medium;1.204 for air </li>
-        <li>v is particle velocity (m/s)</li>
-        <li>$\rho$ is the volumetric mass density of the medium;</li>
-        <li>$c$ is the speed of the sound waves traveling in the medium; (m/s)</li>
-        <li>$w$ is wave cylces per second (v/w=displacement)</li>
-        <li>$k_x$ is (is this just direction?</li>
-
-
-    </ul>
-    Taken from
-    https://en.wikipedia.org/wiki/Particle_displacement
-    https://wikimedia.org/api/rest_v1/media/math/render/svg/da35416c88799a2592b21973285ebac8863aabce
-    https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_acoustic_impedance
-    https://en.wikipedia.org/wiki/Density#Air
-    https://en.wikipedia.org/wiki/Wave_vector#Physics_definition
-
+    <details>
+        <summary>Equations</summary>
+        <div id="part1">
+            <div id="displacement-explanation">
+                <h3>Displacement of a particle</h3>
+                <!--todo:this should range from 0 to (time it take wave to cycle once-->
+                <label>Time (us): 0<input type="range" min="1" max="100" value="1" id="equation-t"></label>100
+                <!-- todo: should we draw this particle somewhere?-->
+                <label>X (mm): 0<input type="range" min="0" max="100" value="1" id="equation-x"></label>100
+                <p id="displacement-equations"></p>
+            </div>
+            <div id="pressure-explanation">
+                <h3>Max Pressure</h3>
+                <p id="pressure-equations"></p>
+                <h3>Loudness</h3>
+                <p id="loudness-equations"></p>
+            </div>
+        </div>    
+    </details>
+    <details>
+        <summary>Glossary</summary>
+        <ul>
+            <li>$A$: Amplitude, this is the maximum displacement the vibrating source (and so the maximum displacement of particles it's vibration is propagated to).</li>
+            <!-- todo: should I highlight more was a wave cycle is?
+            'if you look at a given point, it's the time it takes that point to cycle from position X of the wave back to position X.'-->
+            <li>$f$: Frequency, these means 2 things. At a particle level this is how many times the particle cycles/oscillates per second. At a sound wave level it's how many times the wave cycles per second. That's not a coincidence, the wave frequency is an emergent property of the particle frequency.</li>
+            <li>$v$: Speed of sound in the medium. Our particles are vibrating in a medium (air). Properties like density affect how fast waves can propergate through it - largly indepentant of particle behaviour.</li>
+            <li>$\lambda$: Wave length - the physical space covered by a single wave cycle, or equivilnetly, the phycial distance between 2 points in the wave cycle. You can see this in the simulation as the distance between peaks/troughs of pressure.</li>
+            <li>$k$: The spatial angular frequency of the wave, describing how many oscillations it completes per meter, and related to the wavelength by the equation $k = 2 \pi / λ$. We measure it in radians per meter.</li>
+            <li>$x$: The initial distance of a particle from the sound source before it's started vibrating. It's displacement while vibrating is relative to this point.</li>
+            <!--todo: add an extra section explain the roll of k and w in the formulae, and how they account for the position of x offset by time and space-->
+            <li>$w$:The angular frequency of the wave, describing how many oscillations it completes per second, and related to frequency by the equation $w=2 \pi f$. We measure it in radians per second.</li>
+            <li>$t$: Time in seconds since the source started vibrating.</li>
+            <li>$F$: A function representing the particles movement. It takes an angle representing wear in the current wave cycle the particle is, and maps that to a distance from it's origin. The output is normalized between -1 and 1 so we have to times by $A$ to find the real distance in meters.</li>
+        </ul>
+    </details>
+    <details><summary>Explanation</summary>
+        This model shows how characteristics of a sound wave emerge from underlying properties of air particles.
+        It's important to realise that the dots in the simulation about are NOT molecules - they are air particles which each represent the average movement of a large number of molecules*(foot note to explain why we can't model molecus).
+        
+        When a source vibrates, the air particles adjactent to it vibrate in turn, moving forwards and backwards at the same distance and rate as the source. This causes the air particles in front of them to also vibrate in turn and so on, untill the vibration as propergated all the way to your eardrum - which also vibrates and gets interpreted by your brain as sound.
+        
+        The distance that the source object and the air particles move directly determines the emergent pressure and volume of the sound. You can see this by changing 'max displacement' in the simulation above.
+        
+        How fast the source object and air particles moves backward foth directly determines the freuqnecy of the emergent sound wave.
+        
+        And the rate of change in the position of particles as they moves back and forth gives the emergent sound it's waveform.
+        
+        The speed of sound is not an emerge property of sound particles - it is a property of the medium the particle exist in. For a sound wave to travel forward we said air particles vibrating cause those in front of them to vibrate also. Obviously it takes a non-zero amount of time for this to happen*(explain at a molecular level). The speed of sound is how fast this happens in meters per second. It literaly represent how long it takes for a peak (or any point) of an emergent soundwave to travel from the source object to the listenr. If you change the speed of sound in the simulation above from 100 to 1000 and follow a single pressure peak as it travels across the screen you can literaly see the change in speed.
+        
+        
+        
+        An air particles are themselves an abstraction. Air is composed of a lot(citation) of molecules. When an object vibrates the air molecules near it are pushed forwards and backwards as well. The actual motion of indivual molecules is chaotic but on average they start to virbate like the source. We model this as air particles - where an air particle represents the average movement of a large number of air molecules at that location. If we had the computing power to model indiviual moleculs, we'd see the same emergent behaviour(cite how many molecus would be in the sim we have).
+            Put a brief one here - if more details needed, link to a new page
+    </details>
+    <details><summary>Limitations of the model</summary>
+        <ul>
+            <li>When a setting is changed, we draw the model as if the wave has already had time to propergate all the way from the source (left) to the reciever (right). In reality, if you change a property of the source (it's displacement or frequency of vibration), depending of the speed of sound, it would take time for the new wave to propergate forwards - it would look like the new wave was chasing the old wave left to right</li>
+            <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
+        </ul>
+    </details>
+    <details><summary>How to use the model</summary>
+        <p>
+            To see emergent wave behaviour
+            * wave length must be about the same order of magitude as the width
+            * at 20kHz, wavelength is 17mm - so you can never seen wave effects at a zoom of more then 10mm or so
+            17m at 20hz, so zoom out to 10meter or so
+            but you also need to make sure displacement is large enough to see movement
+        </p>
+    </details>
+    <details><summary>Citations</summary>
+        https://en.wikipedia.org/wiki/Wave_vector
+        https://en.wikipedia.org/wiki/Particle_displacement
+        https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html
+        https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure
+        try tis: https://physics.stackexchange.com/a/110131
+        https://en.wikipedia.org/wiki/Particle_displacement
+        https://wikimedia.org/api/rest_v1/media/math/render/svg/da35416c88799a2592b21973285ebac8863aabce
+        https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_acoustic_impedance
+        https://en.wikipedia.org/wiki/Density#Air
+        https://en.wikipedia.org/wiki/Wave_vector#Physics_definition
+    </details>
 </body>
 
 </html>
