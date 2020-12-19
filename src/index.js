@@ -332,7 +332,6 @@ window.onload = function () {
   modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
   modelCache.size = model.size;
   modelCache = cache(modelCache, model, svgDim.width);
-
   gui.add(model, 'pause');
 
   gui.add(model, 'particleNumber', 10, 15010, 10)

@@ -61,24 +61,19 @@
             <li>$F$: A function representing the particles movement. It takes an angle representing wear in the current wave cycle the particle is, and maps that to a distance from it's origin. The output is normalized between -1 and 1 so we have to times by $A$ to find the real distance in meters.</li>
         </ul>
     </details>
-    <details><summary>Explanation</summary>
+    <h2>Explanation</h2>
+    <p>
         This model shows how characteristics of a sound wave emerge from underlying properties of air particles.
-        It's important to realise that the dots in the simulation about are NOT molecules - they are air particles which each represent the average movement of a large number of molecules*(foot note to explain why we can't model molecus).
-        
-        When a source vibrates, the air particles adjactent to it vibrate in turn, moving forwards and backwards at the same distance and rate as the source. This causes the air particles in front of them to also vibrate in turn and so on, untill the vibration as propergated all the way to your eardrum - which also vibrates and gets interpreted by your brain as sound.
-        
-        The distance that the source object and the air particles move directly determines the emergent pressure and volume of the sound. You can see this by changing 'max displacement' in the simulation above.
-        
-        How fast the source object and air particles moves backward foth directly determines the freuqnecy of the emergent sound wave.
-        
-        And the rate of change in the position of particles as they moves back and forth gives the emergent sound it's waveform.
-        
-        The speed of sound is not an emerge property of sound particles - it is a property of the medium the particle exist in. For a sound wave to travel forward we said air particles vibrating cause those in front of them to vibrate also. Obviously it takes a non-zero amount of time for this to happen*(explain at a molecular level). The speed of sound is how fast this happens in meters per second. It literaly represent how long it takes for a peak (or any point) of an emergent soundwave to travel from the source object to the listenr. If you change the speed of sound in the simulation above from 100 to 1000 and follow a single pressure peak as it travels across the screen you can literaly see the change in speed.
-        
-        
-        
-        An air particles are themselves an abstraction. Air is composed of a lot(citation) of molecules. When an object vibrates the air molecules near it are pushed forwards and backwards as well. The actual motion of indivual molecules is chaotic but on average they start to virbate like the source. We model this as air particles - where an air particle represents the average movement of a large number of air molecules at that location. If we had the computing power to model indiviual moleculs, we'd see the same emergent behaviour(cite how many molecus would be in the sim we have).
-            Put a brief one here - if more details needed, link to a new page
+        It's important to realise that the dots in the simulation about are NOT molecules - they are air particles which each represent the average movement of a large number of molecules <sup><a href="#fn1" id="r1">[1]</a></sup>.
+    </p>
+    <p>When a source vibrates, the air particles adjacent to it vibrate in turn, moving forwards and backwards at the same distance and rate as the source. This causes the air particles in front of them to also vibrate in turn and so on, untill the vibration as propagated all the way to your eardrum - which also vibrates and gets interpreted by your brain as sound.
+    </p>
+    <p>The distance that the source object and the air particles move directly determines the emergent pressure and volume of the sound. You can see this by changing 'max displacement' in the simulation above.</p>
+    <p>How fast the source object and air particles moves backward foth directly determines the freuqnecy of the emergent sound wave.</p>
+    <p>And the rate of change in the position of particles as they moves back and forth gives the emergent sound it's waveform.</p>
+    <p>The speed of sound is not an emerge property of sound particles - it is a property of the medium the particle exist in. For a sound wave to travel forward we said air particles vibrating cause those in front of them to vibrate also. Obviously it takes a non-zero amount of time for this to happen*(explain at a molecular level). The speed of sound is how fast this happens in meters per second. It literaly represent how long it takes for a peak (or any point) of an emergent soundwave to travel from the source object to the listenr. If you change the speed of sound in the simulation above from 100 to 1000 and follow a single pressure peak as it travels across the screen you can literaly see the change in speed.</p>
+    <p>An air particles are themselves an abstraction. Air is composed of a lot(citation) of molecules. When an object vibrates the air molecules near it are pushed forwards and backwards as well. The actual motion of indivual molecules is chaotic but on average they start to virbate like the source. We model this as air particles - where an air particle represents the average movement of a large number of air molecules at that location. If we had the computing power to model indiviual moleculs, we'd see the same emergent behaviour(cite how many molecus would be in the sim we have).
+        Put a brief one here - if more details needed, link to a new page</p>
     </details>
     <details><summary>Limitations of the model</summary>
         <ul>
@@ -86,16 +81,8 @@
             <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
         </ul>
     </details>
-    <details><summary>How to use the model</summary>
-        <p>
-            To see emergent wave behaviour
-            * wave length must be about the same order of magitude as the width
-            * at 20kHz, wavelength is 17mm - so you can never seen wave effects at a zoom of more then 10mm or so
-            17m at 20hz, so zoom out to 10meter or so
-            but you also need to make sure displacement is large enough to see movement
-        </p>
-    </details>
-    <details><summary>Citations</summary>
+    <h2>Footnotes</h2>
+        <p id="fn1"><a href="#r1">[1]</a>The simulation is based on air particles instead of molecules because of how many air molecules you would need to render to cause accurate emergent properties of a sound wave. Our simulation spaces is about 100mm by 20mm. If we image a depth of 10mm - in that volume of air there are X molecules. The simulation couldn't handle that many. If you were simulating molecules, you would also have to simulate the physics of them being pushed by the sound source, colliding and bouncing off each other. Their individual paths would be messy, but on average they would act as the sound particles we have and you'd see the same emergent behavior, </p>
         https://en.wikipedia.org/wiki/Wave_vector
         https://en.wikipedia.org/wiki/Particle_displacement
         https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html
