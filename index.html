@@ -32,8 +32,7 @@
     <h2>Equations</h2>
     <div id="part1">
         <div id="displacement-explanation">
-            <h3>Displacement of a particle</h3>
-            <p>Based on <a href="https://en.wikipedia.org/wiki/Wave_vector#Physics_definition">this</a></p>
+            <h3>Displacement of a particle<sup><a href="#fn6" id="r6">[6]</a></sup></h3>
             <!--todo:this should range from 0 to (time it take wave to cycle once-->
             <label id="time-label">Time (µs): 0<input type="range" min="1" max="100" value="1"
                     id="equation-t">100</label>
@@ -42,14 +41,9 @@
             <p id="displacement-equations"></p>
         </div>
         <div id="pressure-explanation">
-            <h3>Max Pressure</h3>
-            <p>Based on the equation at the very bottom of <a
-                    href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
-                $z_m(r,s)$ replaced with $z_0$</p>
+            <h3>Max Pressure<sup><a href="#fn13" id="r13">[13]</a></sup></h3>
             <p id="pressure-equations"></p>
-            <h3>Loudness</h3>
-            <p>Based on <a href="https://en.wikipedia.org/wiki/Sound_pressure#Sound_pressure_level">this</a> equation.
-            </p>
+            <h3>Loudness<sup><a href="#fn4" id="r4">[4]</a></sup></h3>
             <p id="loudness-equations"></p>
         </div>
     </div>
@@ -62,7 +56,7 @@
         <li>$A$: Amplitude, this is the maximum displacement of the vibrating particles from their starting positions,
             or the peak magnitude of their oscillation<sup><a href="#fn6" id="r6">[6]</a></sup><sup><a href="#fn12" id="r12">[12]</a></sup>. In millimeters.
             Amplitude can also refer to the change in pressure caused by a sound wave, in which case it's measure in
-            pascals, not meters<sup><a href="#fn11" id="r11">[11]</a>. A sound wave's pressure amplitude is correlated and caused by the amplitude of the sound particles' displacements.</li>
+            pascals, not meters<sup><a href="#fn11" id="r11">[11]</a></sup>. A sound wave's pressure amplitude is correlated and caused by the amplitude of the sound particles' displacements.</li>
         <li>$v$: The speed of sound, or how fast vibrations propagate between sound particles/through the medium
             (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium like
             density affect it but it's independent of properties of the sound wave/particle vibrations (amplitude,
@@ -198,6 +192,9 @@
     <p id="fn10"><a href="#r10">[10]</a>https://en.wikipedia.org/wiki/Density</p>
     <p id="fn11"><a href="#r11">[11]</a>https://en.wikipedia.org/wiki/Sound_pressure</p>
     <p id="fn12"><a href="#r12">[12]</a>https://en.wikipedia.org/wiki/Particle_displacement</p>
+    <p id="fn13"><a href="#r13">[13]</a>Based on the equation at the very bottom of <a
+        href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
+    $z_m(r,s)$ replaced with $z_0$</p>
 </body>
 
 </html>
