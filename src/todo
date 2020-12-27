@@ -1,14 +1,9 @@
 todo:
 make the axis ranges for pressure/displacments graphs set size (max and min of sim domainm)
     but also make them exponential
-consider dashed lines to link particles in sim to their particle in top/bottom graphs
 consider removing units from equations
 write up html sections
 make equation x range same as sim width
 make equation t range same as wave period (so you can see values for 1 whole wave cycle)
-condier showing where the equations X would be in the sim
-    cosnider ability to set sim time to equation time (with sim paused)
-    or making a 'one particle' diagram just for the equation
-label wave lenght on sim (arrow between 2 points, dones;t need to be animated)
-show cords of point on mouse over
+
 stretch: play the sounds

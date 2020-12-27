@@ -31138,8 +31138,8 @@ function pressureToSpl(pressure, rmsFactor) {
 
 function cache(modelCache, model, svgWidth) {
   // cycles per second. spatial freq
-  modelCache.w = 2 * Math.PI * model.freq;
-  modelCache.waveLength = model.speedOfSound / model.freq;
+  modelCache.w = 2 * Math.PI * model.f;
+  modelCache.waveLength = model.v / model.f;
   // cycles per meter, angular freq
   modelCache.k = 2 * Math.PI / modelCache.waveLength;
   modelCache.toMetersScaleFactor = modelCache.simWidth / svgWidth;
@@ -31163,9 +31163,9 @@ function maxPressure(model, modelCache) {
   // https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_specific_acoustic_impedance
   // for reference, this should be 413 for actual speed of sound in air (and our assumed air pressure)
   // https://en.wikipedia.org/wiki/Acoustic_impedance#Effect_of_temperature
-  let roomairAccousticImpedance = airDensity * model.speedOfSound;
+  let roomairAccousticImpedance = airDensity * model.v;
   modelCache.roomairAccousticImpedance = roomairAccousticImpedance;
-  let pressure = modelCache.maxDisplacement * 2 * Math.PI * model.freq * roomairAccousticImpedance;
+  let pressure = modelCache.maxDisplacement * 2 * Math.PI * model.f * roomairAccousticImpedance;
   return pressure;
 }
 
@@ -31200,10 +31200,10 @@ function displacement_equations(model, modelCache, particle, time) {
   let x = document.getElementById('equation-x').value * 0.001 * modelCache.toMetersScaleFactor;
   let displacement = modelCache.maxDisplacement * Math.cos(modelCache.k * x - modelCache.w * time*0.000001);
   let template = `
-  $$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, f=${formatSiPrefix(model.freq, "{Hz}")}, t=${formatSiPrefix(time, "s")}, x=${formatSiPrefix(x, "m")}, v=${formatSiPrefix(model.speedOfSound, "{m/s}")}$$
-  $$λ=\\frac{v}{f}=\\frac{${formatSiPrefix(model.speedOfSound, "m/s")}}{${formatSiPrefix(model.freq, "Hz")}}=${formatSiPrefix(modelCache.waveLength, "m")}$$
+  $$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, f=${formatSiPrefix(model.f, "{Hz}")}, t=${formatSiPrefix(time, "s")}, x=${formatSiPrefix(x, "m")}, v=${formatSiPrefix(model.v, "{m/s}")}$$
+  $$λ=\\frac{v}{f}=\\frac{${formatSiPrefix(model.v, "m/s")}}{${formatSiPrefix(model.f, "Hz")}}=${formatSiPrefix(modelCache.waveLength, "m")}$$
   $$k=\\frac{2\\pi}{λ}=\\frac{2\\pi}{${formatSiPrefix(modelCache.waveLength, "m")}}=${formatSiPrefix(2*Math.PI/modelCache.waveLength, "^c/s")}$$
-  $$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
+  $$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.f, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.f, "^c/s")}$$
   $\${displacement}=A {F}(k x - wt)$$\
   $$${formatSiPrefix(displacement, "m")}=${formatSiPrefix(modelCache.maxDisplacement, "m")} ${model.waveform.equationName} (k ${formatSiPrefix(x, "m")} - w${formatSiPrefix(time, "s")})$$
 `;
@@ -31215,10 +31215,10 @@ function displacement_equations(model, modelCache, particle, time) {
 
 function pressureEquations(model, modelCache) {
   let template = `
-$$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, ρ=1.204kg/m^3, c=${formatSiPrefix(model.speedOfSound, "m/s")}$$
-$$Z_0=ρc=1.204kg/m^3${formatSiPrefix(model.speedOfSound, "m/s")}$$
-$$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.freq, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}$$
-$$p=AZ_0w=${formatSiPrefix(modelCache.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccousticImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.freq, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
+$$A=${formatSiPrefix(modelCache.maxDisplacement, "m")}, ρ=1.204kg/m^3, c=${formatSiPrefix(model.v, "m/s")}$$
+$$Z_0=ρc=1.204kg/m^3${formatSiPrefix(model.v, "m/s")}$$
+$$w=\\frac{2\\pi}{T}=\\frac{2\\pi}{1/f}=2\\pi f=2\\pi${formatSiPrefix(model.f, "{Hz}")}=${formatSiPrefix(2 * Math.PI * model.f, "^c/s")}$$
+$$p=AZ_0w=${formatSiPrefix(modelCache.maxDisplacement, "m")}${formatSiPrefix(modelCache.roomairAccousticImpedance, "kg/m^2s")}${formatSiPrefix(2 * Math.PI * model.f, "^c/s")}=${formatSiPrefix(model.pressure, "pa")}$$
 `
   let element = document.getElementById("pressure-equations");
   element.innerText = template;
@@ -31267,13 +31267,13 @@ window.onload = function () {
     width: 100000,
     timeUnit: "micrometers",
     timeScale: 10,
-    freq: 10350,
+    f: 10350,
     //todo: consider making this a dropdown
     // of speed of sound at specific temperatures/materials
-    speedOfSound: 343,
+    v: 343,
     particleNumber: 5010,
     maxDisplacementUnit: "micrometers",
-    maxDisplacement: 4800,
+    A: 4800,
     size: 1,
     tone: 'sin',
     waveform: _waveforms__WEBPACK_IMPORTED_MODULE_2__["waveforms"]['sin'],
@@ -31310,7 +31310,7 @@ window.onload = function () {
   modelCache.pressureCurveYoffset = layout.chartHeights * 0.5 + 10;
   modelCache.displacementCurveYoffset = svgDim.height - layout.chartHeights - 10 + layout.chartHeights * 0.5;
   modelCache.simWidth = unitToScalingFactor(model.widthUnit) * model.width;
-  modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.maxDisplacement;
+  modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.A;
   modelCache.timeScale = unitToScalingFactor(model.timeUnit) * model.timeScale;
   modelCache.size = model.size;
   modelCache = cache(modelCache, model, svgDim.width);
@@ -31340,7 +31340,7 @@ window.onload = function () {
       modelCache = cache(modelCache, model, svgDim.width);
     });
 
-  gui.add(model, 'freq', 2000, 20000, 10)
+  gui.add(model, 'f', 2000, 20000, 10)
     .onChange(() => {
       modelCache = cache(modelCache, model, svgDim.width);
       updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
@@ -31348,16 +31348,16 @@ window.onload = function () {
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
-  gui.add(model, 'speedOfSound', 100, 1000, 1)
+  gui.add(model, 'v', 100, 1000, 1)
     .onChange(() => {
       modelCache = cache(modelCache, model, svgDim.width);
       updatePressureChartAxis(layout.chartHeights, model.pressure);
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
     });
 
-  gui.add(model, 'maxDisplacement', 100, 10000, 100)
+  gui.add(model, 'A', 100, 10000, 100)
     .onChange(() => {
-      modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.maxDisplacement;
+      modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.A;
       modelCache = cache(modelCache, model, svgDim.width);
       updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
       updatePressureChartAxis(layout.chartHeights, model.pressure);
@@ -31659,9 +31659,9 @@ let presets = {
                 "particleNumber": 14410,
                 "size": 1,
                 "timeScale": 20,
-                "freq": 10350,
-                "speedOfSound": 343,
-                "maxDisplacement": 4800,
+                "f": 10350,
+                "v": 343,
+                "A": 4800,
                 "tone": "sin"
             }
         },
@@ -31670,29 +31670,29 @@ let presets = {
                 "particleNumber": 100,
                 "size": 3,
                 "timeScale": 40,
-                "freq": 9180,
-                "speedOfSound": 343,
-                "maxDisplacement": 2500,
+                "f": 9180,
+                "v": 343,
+                "A": 2500,
             }
         },
         "Sin, C7, 180dB": {
             "0": {
-                "freq": 2093,
+                "f": 2093,
             }
         },
         "Sin, C8, 82dB": {
             "0": {
-                "freq": 4186,
+                "f": 4186,
             }
         },
         "Sin, C9, 82dB": {
             "0": {
-                "freq": 8372,
+                "f": 8372,
             }
         },
         "Sin, C10, 82dB": {
             "0": {
-                "freq": 16744,
+                "f": 16744,
             }
         },
     },

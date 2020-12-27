@@ -21,79 +21,175 @@
 
 <body>
     <h1>Sound wave particle simulator</h1>
+    <p>This simulator and everything written here is pieced to together from the internet - any of it might be wrong. If
+        you see a mistake, <a href="https://github.com/Rthe1st/wave_simulator">feel free to
+            let me know</a> and I'll
+        fix it if I have a chance.</p>
     <div id="container">
         <svg id='diagram'></svg>
         <canvas id="canvas" width="100%"></canvas>
     </div>
-    <details>
-        <summary>Equations</summary>
-        <div id="part1">
-            <div id="displacement-explanation">
-                <h3>Displacement of a particle</h3>
-                <!--todo:this should range from 0 to (time it take wave to cycle once-->
-                <label>Time (us): 0<input type="range" min="1" max="100" value="1" id="equation-t"></label>100
-                <!-- todo: should we draw this particle somewhere?-->
-                <label>X (mm): 0<input type="range" min="0" max="100" value="1" id="equation-x"></label>100
-                <p id="displacement-equations"></p>
-            </div>
-            <div id="pressure-explanation">
-                <h3>Max Pressure</h3>
-                <p id="pressure-equations"></p>
-                <h3>Loudness</h3>
-                <p id="loudness-equations"></p>
-            </div>
-        </div>    
-    </details>
-    <details>
-        <summary>Glossary</summary>
-        <ul>
-            <li>$A$: Amplitude, this is the maximum displacement the vibrating source (and so the maximum displacement of particles it's vibration is propagated to).</li>
-            <!-- todo: should I highlight more was a wave cycle is?
-            'if you look at a given point, it's the time it takes that point to cycle from position X of the wave back to position X.'-->
-            <li>$f$: Frequency, these means 2 things. At a particle level this is how many times the particle cycles/oscillates per second. At a sound wave level it's how many times the wave cycles per second. That's not a coincidence, the wave frequency is an emergent property of the particle frequency.</li>
-            <li>$v$: Speed of sound in the medium. Our particles are vibrating in a medium (air). Properties like density affect how fast waves can propergate through it - largly indepentant of particle behaviour.</li>
-            <li>$\lambda$: Wave length - the physical space covered by a single wave cycle, or equivilnetly, the phycial distance between 2 points in the wave cycle. You can see this in the simulation as the distance between peaks/troughs of pressure.</li>
-            <li>$k$: The spatial angular frequency of the wave, describing how many oscillations it completes per meter, and related to the wavelength by the equation $k = 2 \pi / λ$. We measure it in radians per meter.</li>
-            <li>$x$: The initial distance of a particle from the sound source before it's started vibrating. It's displacement while vibrating is relative to this point.</li>
-            <!--todo: add an extra section explain the roll of k and w in the formulae, and how they account for the position of x offset by time and space-->
-            <li>$w$:The angular frequency of the wave, describing how many oscillations it completes per second, and related to frequency by the equation $w=2 \pi f$. We measure it in radians per second.</li>
-            <li>$t$: Time in seconds since the source started vibrating.</li>
-            <li>$F$: A function representing the particles movement. It takes an angle representing wear in the current wave cycle the particle is, and maps that to a distance from it's origin. The output is normalized between -1 and 1 so we have to times by $A$ to find the real distance in meters.</li>
-        </ul>
-    </details>
+    <h2>Equations</h2>
+    <div id="part1">
+        <div id="displacement-explanation">
+            <h3>Displacement of a particle</h3>
+            <p>Based on <a href="https://en.wikipedia.org/wiki/Wave_vector#Physics_definition">this</a></p>
+            <!--todo:this should range from 0 to (time it take wave to cycle once-->
+            <label id="time-label">Time (µs): 0<input type="range" min="1" max="100" value="1"
+                    id="equation-t">100</label>
+            <!-- todo: should we draw this particle somewhere?-->
+            <label id="x-label">X (mm): 0<input type="range" min="0" max="100" value="1" id="equation-x">100</label>
+            <p id="displacement-equations"></p>
+        </div>
+        <div id="pressure-explanation">
+            <h3>Max Pressure</h3>
+            <p>Based on the equation at the very bottom of <a
+                    href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
+                $z_m(r,s)$ replaced with $z_0$</p>
+            <p id="pressure-equations"></p>
+            <h3>Loudness</h3>
+            <p>Based on <a href="https://en.wikipedia.org/wiki/Sound_pressure#Sound_pressure_level">this</a> equation.
+            </p>
+            <p id="loudness-equations"></p>
+        </div>
+    </div>
+    <h2>Glossary</h2>
+    <ul>
+        <li>${timeScale}$: What speed to play the simulation at, in microseconds per second of real time. So a value of
+            100 means it's slowed down to one-thousandth of realtime - 10 means one hundred-thousandth, 1 means
+            one-millionth.</li>
+        <li>$t$: Time in microseconds since the source of sound started vibrating.</li>
+        <li>$A$: Amplitude, this is the maximum displacement of the vibrating particles from their starting positions,
+            or the peak magnitude of their oscillation<sup><a href="#fn6" id="r6">[6]</a></sup>. In millimeters.
+            Amplitude can also refer to the change in pressure caused by a sound wave, in which case it's measure in
+            pascals, not meters. A sound wave's amplitude is caused by the amplitude of the sound particles.</li>
+        <li>$v$: The speed of sound, or how fast vibrations propagate between sound particles/through the medium
+            (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium like
+            density affect it but it's independent of properties of the sound wave/particle vibrations (amplitude,
+            frequency, etc).</li>
+        <li>$f$: Frequency<sup><a href="#fn8" id="r8">[8]</a></sup>. At a particle level this is how many times the
+            particle oscillates per
+            second. At a sound wave level it's how many complete wave cycles pass through a given point per second.
+            The sound wave's frequency emerges from the particles' frequency.</li>
+        <li>$\lambda$: Wave length - the distance over which the wave's shape repeats<sup><a href="#fn5"
+                    id="r5">[5]</a></sup>. You can see this in the simulation as the distance
+            between peaks/troughs of pressure.</li>
+        <li>$k$: The spatial angular frequency of the wave, describing how many wave cycles it completes per meter.
+            Measured it in radians per meter ($2\pi$ radians being one wave cycle).</li>
+        <li>$x$: The initial distance of a particle from the sound source. It's displacement while vibrating is relative
+            to this point. Together with $v$ it determines the phase offset of a particle's vibration relative to the
+            sound source.</li>
+        <li>$w$:The (temporal) angular frequency of the wave, describing how many oscillations it completes per second.
+            Measured in
+            radians per second ($2\pi$ radians being one wave cycle).</li>
+        <li>$F$: A function representing how a particle's displacement changes over the course of one oscillation. It
+            takes an
+            angle in radians representing where in the current wave cycle the particle is (between $0$ and $2\pi$), and
+            maps that
+            to its displacement. The output is between -1 and 1 so you multiply by $A$ to find the distance in meters.
+        </li>
+        <li>$p$ the pressure caused by the sound wave, in pascals (pa)<sup><a href="#fn11" id="r11">[11]</a></sup>. Our
+            values are absolute, not relative to ambient air pressure. It's value is constantly changing at each point
+            as the sound wave moves forward, which is why we use the Root Mean Square of it's value to get an average
+            (see SPL). wikipedia has <a href="https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure">a good list</a> of the pressures caused by different sounds.</li>
+        <li>$Z_0$ is the characteristic acoustic impedance of the medium (air) the sound/vibration is in<sup><a
+                    href="#fn9" id="r9">[9]</a></sup>. Kind of the resistance of the medium to the vibration.</li>
+        <li>$\rho$ density of the medium (air) the vibration is in<sup><a href="#fn10" id="r10">[10]</a></sup>.</li>
+        <li>$p_0$: reference pressure, approximately the quietest sound a young human with undamaged hearing can detect
+            at 1,000 Hz<sup><a href="#fn3" id="r3">[3]</a></sup></li>
+        <li>${SPL}$: The RMS pressure level caused by the sound, or (roughly) how loud it is.<sup><a href="#fn4"
+                    id="r4">[4]</a></sup></li>
+    </ul>
     <h2>Explanation</h2>
     <p>
-        This model shows how characteristics of a sound wave emerge from underlying properties of air particles.
-        It's important to realise that the dots in the simulation about are NOT molecules - they are air particles which each represent the average movement of a large number of molecules <sup><a href="#fn1" id="r1">[1]</a></sup>.
+        This model shows how characteristics of a sound wave emerge from the underlying movement of sound particles.
+        Sound particles are the dots in the simulation <sup><a href="#fn2" id="r2">[2]</a></sup>. You can think of a
+        sound particle as representing the average movement of a large number of air molecules<sup><a href="#fn1"
+                id="r1">[1]</a></sup>.
     </p>
-    <p>When a source vibrates, the air particles adjacent to it vibrate in turn, moving forwards and backwards at the same distance and rate as the source. This causes the air particles in front of them to also vibrate in turn and so on, untill the vibration as propagated all the way to your eardrum - which also vibrates and gets interpreted by your brain as sound.
+    <p>
+        Sound waves are caused by a source object vibrating - moving back and forth in a consistent pattern. As it
+        vibrates, it moves the sound particles around it and they end up vibrating back and forth in the same pattern as
+        the source. These sound particles then move the sound particles in front of them and so on, causing the
+        vibration of the source to propagate through the air. Eventually the vibration propagates all the way to your
+        eardrum - whose vibration is interpreted by your brain as sound.
     </p>
-    <p>The distance that the source object and the air particles move directly determines the emergent pressure and volume of the sound. You can see this by changing 'max displacement' in the simulation above.</p>
-    <p>How fast the source object and air particles moves backward foth directly determines the freuqnecy of the emergent sound wave.</p>
-    <p>And the rate of change in the position of particles as they moves back and forth gives the emergent sound it's waveform.</p>
-    <p>The speed of sound is not an emerge property of sound particles - it is a property of the medium the particle exist in. For a sound wave to travel forward we said air particles vibrating cause those in front of them to vibrate also. Obviously it takes a non-zero amount of time for this to happen*(explain at a molecular level). The speed of sound is how fast this happens in meters per second. It literaly represent how long it takes for a peak (or any point) of an emergent soundwave to travel from the source object to the listenr. If you change the speed of sound in the simulation above from 100 to 1000 and follow a single pressure peak as it travels across the screen you can literaly see the change in speed.</p>
-    <p>An air particles are themselves an abstraction. Air is composed of a lot(citation) of molecules. When an object vibrates the air molecules near it are pushed forwards and backwards as well. The actual motion of indivual molecules is chaotic but on average they start to virbate like the source. We model this as air particles - where an air particle represents the average movement of a large number of air molecules at that location. If we had the computing power to model indiviual moleculs, we'd see the same emergent behaviour(cite how many molecus would be in the sim we have).
-        Put a brief one here - if more details needed, link to a new page</p>
-    </details>
-    <details><summary>Limitations of the model</summary>
-        <ul>
-            <li>When a setting is changed, we draw the model as if the wave has already had time to propergate all the way from the source (left) to the reciever (right). In reality, if you change a property of the source (it's displacement or frequency of vibration), depending of the speed of sound, it would take time for the new wave to propergate forwards - it would look like the new wave was chasing the old wave left to right</li>
-            <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both on the same graph. So example, a 100dB sound causes a displacement of Xnm, while the lowest freuqnecy we can hear (~20hz) has a wave length of 17mm. We limit the domain of what can be modeled to what can be usefully visualized.</li>
-        </ul>
-    </details>
+    <p>
+        In the simulation above, imagine the moving line on the left as the source of the sound, and the listener being
+        somewhere off to the right.
+    </p>
+    <p>
+        However this propagation takes time - obviously the particles near the source are made to vibrate earlier. This
+        causes the vibrations of the particles to be out of phase with each other, having all started at different
+        times. The time it takes for vibrations to propagate among particles is determined by the underlying
+        medium and this is what we call the speed of
+        sound.
+    </p>
+    <p>
+        The fact that the particles are vibrating out of phase is what causes the areas of low and high density
+        particles to appear, as particles at a slow points in their cycle are caught up by those at a fast points, or
+        vice versa.
+    </p>
+    <p>
+        The maximum increase or decrease in density of particles (measured as pressure) is determined by the
+        distance each particles moves while vibrating and is called it's amplitude. This is a big factor in how we loud
+        we perceive it to be.
+    </p>
+    <p>
+        How often a particle vibrates per second is its frequency, and also gives the emergent sound wave its frequency.
+    </p>
+    <p>
+        How a particle's displacement changes over the course of a vibration is what dictates a sound wave's shape, or a
+        tone
+        of it's sound.
+    </p>
+    <h2>Limitations of the model</h2>
+    <ul>
+        <li>Our imaginary sound wave doesn't lose energy (get quieter) as it progresses forwards.</li>
+        <li>Everything is 2 dimensional.</li>
+        <li>We don't model the propagation of a change in the sound source. When a setting is changed, we draw the model
+            as if the new wave has already had time to propagate all the way
+            from the left to the right of the simulation. In reality, if the vibrations on the right of the graph
+            changed (it's displacement or frequency), it would take time for the new wave to propagate forwards - it
+            would look like the new wave was chasing the old wave left to right.</li>
+        <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the
+            particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both
+            on the same graph. For example, a 100dB sound causes a displacement of 100nm, while the lowest frequency we
+            can hear (~20hz) has a wave length of 17mm.</li>
+        <li>At high frequencies you get thick bands of particles are the peak pressure points, and they get wider as
+            frequency increase. I don't understand this and wether it's a bug, limitation our model, or a real effect.
+        </li>
+    </ul>
+    </h2>
     <h2>Footnotes</h2>
-        <p id="fn1"><a href="#r1">[1]</a>The simulation is based on air particles instead of molecules because of how many air molecules you would need to render to cause accurate emergent properties of a sound wave. Our simulation spaces is about 100mm by 20mm. If we image a depth of 10mm - in that volume of air there are X molecules. The simulation couldn't handle that many. If you were simulating molecules, you would also have to simulate the physics of them being pushed by the sound source, colliding and bouncing off each other. Their individual paths would be messy, but on average they would act as the sound particles we have and you'd see the same emergent behavior, </p>
-        https://en.wikipedia.org/wiki/Wave_vector
-        https://en.wikipedia.org/wiki/Particle_displacement
-        https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html
-        https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure
-        try tis: https://physics.stackexchange.com/a/110131
-        https://en.wikipedia.org/wiki/Particle_displacement
-        https://wikimedia.org/api/rest_v1/media/math/render/svg/da35416c88799a2592b21973285ebac8863aabce
-        https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_acoustic_impedance
-        https://en.wikipedia.org/wiki/Density#Air
-        https://en.wikipedia.org/wiki/Wave_vector#Physics_definition
-    </details>
+    <p id="fn1"><a href="#r1">[1]</a>You could in principle simulate molecules of air directly and see the same emergent
+        effects - but you have to simulate a lot of them. Our simulation space represents a 100mm by 20mm area. Assume a
+        depth of 10mm - 100mmx20mmx10mm volume of air contains 5.06e+20 molecules (<a
+            href="https://www.quora.com/How-many-air-molecules-are-present-in-a-cubic-meter-of-air">based on 10e25
+            molecules per meter cube</a>). The simulation can barely handle 20,000. You'd also have to simulate the
+        physics of them colliding with each other. Their individual paths would be messy, but on average they would move
+        like our sound particles do and you'd see the same sound waves emerge. You also wouldn't be able to draw the
+        individual molecules anyway - at the scale needed to see the sound wave individual molecules would be smaller
+        then a pixel.</p>
+    <p id="fn2"><a href="#r2">[2]</a>https://en.wikipedia.org/wiki/Sound_particle</p>
+    <p id="fn3"><a href="#r3">[3]</a>https://en.wikipedia.org/wiki/Absolute_threshold_of_hearing</p>
+    <p id="fn4"><a href="#r4">[4]</a>https://en.wikipedia.org/wiki/Sound_pressure#Sound_pressure_level</p>
+    <p id="fn5"><a href="#r5">[5]</a>https://en.wikipedia.org/wiki/Wavelength</p>
+    <p id="fn6"><a href="#r6">[6]</a>https://en.wikipedia.org/wiki/Wave_vector#Physics_definition</p>
+    <p id="fn7"><a href="#r7">[7]</a>https://en.wikipedia.org/wiki/Speed_of_sound</p>
+    <p id="fn8"><a href="#r8">[8]</a>https://en.wikipedia.org/wiki/Frequency</p>
+    <p id="fn9"><a
+            href="#r9">[9]</a>https://en.wikipedia.org/wiki/Acoustic_impedance#Characteristic_specific_acoustic_impedance
+    </p>
+    <p id="fn10"><a href="#r10">[10]</a>https://en.wikipedia.org/wiki/Density</p>
+    <p id="fn11"><a href="#r11">[11]</a>https://en.wikipedia.org/wiki/Sound_pressure</p>
+    https://en.wikipedia.org/wiki/Wave_vector
+    https://en.wikipedia.org/wiki/Particle_displacement
+    https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html
+    try tis: https://physics.stackexchange.com/a/110131
+    https://en.wikipedia.org/wiki/Particle_displacement
+    https://wikimedia.org/api/rest_v1/media/math/render/svg/da35416c88799a2592b21973285ebac8863aabce
+    https://en.wikipedia.org/wiki/Wave_vector#Physics_definition
 </body>
 
 </html>
