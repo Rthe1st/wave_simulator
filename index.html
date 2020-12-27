@@ -13,8 +13,8 @@
             }
         };
     </script>
-    <!-- <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>-->
-    <script type="text/javascript" id="MathJax-script" async src="./mathjax_local.js"></script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script src="dist/index.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
@@ -54,17 +54,21 @@
             one-millionth.</li>
         <li>$t$: Time in microseconds since the source of sound started vibrating.</li>
         <li>$A$: Amplitude, this is the maximum displacement of the vibrating particles from their starting positions,
-            or the peak magnitude of their oscillation<sup><a href="#fn6" id="r6">[6]</a></sup><sup><a href="#fn12" id="r12">[12]</a></sup>. In millimeters.
+            or the peak magnitude of their oscillation<sup><a href="#fn6" id="r6">[6]</a></sup><sup><a href="#fn12"
+                    id="r12">[12]</a></sup>. In millimeters.
             Amplitude can also refer to the change in pressure caused by a sound wave, in which case it's measure in
-            pascals, not meters<sup><a href="#fn11" id="r11">[11]</a></sup>. A sound wave's pressure amplitude is correlated and caused by the amplitude of the sound particles' displacements.</li>
+            pascals, not meters<sup><a href="#fn11" id="r11">[11]</a></sup>. A sound wave's pressure amplitude is
+            correlated and caused by the amplitude of the sound particles' displacements.</li>
         <li>$v$: The speed of sound, or how fast vibrations propagate between sound particles/through the medium
             (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium like
             density affect it but it's independent of properties of the sound wave/particle vibrations (amplitude,
             frequency, etc).</li>
-        <li>$f$: Frequency measured in hz.<sup><a href="#fn8" id="r8">[8]</a></sup>. At a particle level this is how many times the
+        <li>$f$: Frequency measured in hz.<sup><a href="#fn8" id="r8">[8]</a></sup>. At a particle level this is how
+            many times the
             particle oscillates per
             second. At a sound wave level it's how many complete wave cycles pass through a given point per second.
-            Both have the same value, with the sound wave's frequency being an emergent property of the sound particles' frequencies.</li>
+            Both have the same value, with the sound wave's frequency being an emergent property of the sound particles'
+            frequencies.</li>
         <li>$\lambda$: Wave length - the distance over which the wave's shape repeats<sup><a href="#fn5"
                     id="r5">[5]</a></sup>. You can see this in the simulation as the distance
             between peaks/troughs of pressure.</li>
@@ -85,7 +89,8 @@
         <li>$p$ the pressure caused by the sound wave, in pascals (pa)<sup><a href="#fn11" id="r11">[11]</a></sup>. Our
             values are absolute, not relative to ambient air pressure. It's value is constantly changing at each point
             as the sound wave moves forward, which is why we use the Root Mean Square of it's value to get an average
-            (see SPL). Wikipedia has <a href="https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure">a good list</a> of the pressures caused by different sounds.</li>
+            (see SPL). Wikipedia has <a href="https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure">a
+                good list</a> of the pressures caused by different sounds.</li>
         <li>$Z_0$ is the characteristic acoustic impedance of the medium (air) the sound/vibration is in<sup><a
                     href="#fn9" id="r9">[9]</a></sup>. Kind of the resistance of the medium to the vibration.</li>
         <li>$\rho$ density of the medium (air) the vibration is in<sup><a href="#fn10" id="r10">[10]</a></sup>.</li>
@@ -157,8 +162,11 @@
     <h2>Things that felt important when I learnt them</h2>
     <ul>
         <li>A sound wave causes no net movement of particles - that's what fans do, not speakers.</li>
-        <li>To repeat what's above: frequency of a sound is how many times its particles are moving back and forth per second, it's amplitude is how far they are moving and it's tone is what the graph of that movement over time looks like.</li>
-        <li>Even the loudest noises we can hear involve pretty tiny displacements of air - that's why speaker cones don't need to move very far to make a loud noise. Maximum movement only needs to be in millimeters.</li>
+        <li>To repeat what's above: frequency of a sound is how many times its particles are moving back and forth per
+            second, it's amplitude is how far they are moving and it's tone is what the graph of that movement over time
+            looks like.</li>
+        <li>Even the loudest noises we can hear involve pretty tiny displacements of air - that's why speaker cones
+            don't need to move very far to make a loud noise. Maximum movement only needs to be in millimeters.</li>
     </ul>
     </h2>
     <h2>Some more reading</h2>
@@ -167,7 +175,8 @@
         <li>https://physics.bu.edu/~duffy/semester1/c20_disp_pressure.html</li>
         <li>https://physics.stackexchange.com/q/110102</li>
         <li>http://hyperphysics.phy-astr.gsu.edu/hbase/Sound/soucon.html</li>
-        <li>https://www.physicsclassroom.com/Physics-Interactives/Waves-and-Sound/Simple-Wave-Simulator/Simple-Wave-Simulator-Interactive</li>
+        <li>https://www.physicsclassroom.com/Physics-Interactives/Waves-and-Sound/Simple-Wave-Simulator/Simple-Wave-Simulator-Interactive
+        </li>
     </ul>
     <h2>Footnotes</h2>
     <p id="fn1"><a href="#r1">[1]</a>You could in principle simulate molecules of air directly and see the same emergent
@@ -193,8 +202,8 @@
     <p id="fn11"><a href="#r11">[11]</a>https://en.wikipedia.org/wiki/Sound_pressure</p>
     <p id="fn12"><a href="#r12">[12]</a>https://en.wikipedia.org/wiki/Particle_displacement</p>
     <p id="fn13"><a href="#r13">[13]</a>Based on the equation at the very bottom of <a
-        href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
-    $z_m(r,s)$ replaced with $z_0$</p>
+            href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
+        $z_m(r,s)$ replaced with $z_0$</p>
 </body>
 
 </html>
