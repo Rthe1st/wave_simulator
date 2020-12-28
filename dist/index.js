@@ -31110,17 +31110,16 @@ function drawDisplacementChart(svg, leftX, rightX, y, chartHeight) {
   d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg).append("text")
     .attr("transform", `translate(${leftX - 160},${y + chartHeight * 0.5})`)
     .text("Displacement");
-}
 
-function updateDisplacementChartAxis(height, maxDisplacement) {
-  let yRange = d3__WEBPACK_IMPORTED_MODULE_0__["scaleLinear"]().domain([maxDisplacement, -maxDisplacement]).range([0, height]);
+  let yRange2 = d3__WEBPACK_IMPORTED_MODULE_0__["scaleLinear"]().domain([0.01, -0.01]).range([0, chartHeight]);
 
-  var axis = d3__WEBPACK_IMPORTED_MODULE_0__["axisLeft"](yRange)
+  var axis = d3__WEBPACK_IMPORTED_MODULE_0__["axisLeft"](yRange2)
     .tickFormat((d, i) => d3__WEBPACK_IMPORTED_MODULE_0__["format"](".3s")(d) + "m")
     .ticks(3);
 
   d3__WEBPACK_IMPORTED_MODULE_0__["select"]('#displacement-chart')
     .call(axis);
+
 }
 
 // rmsFactor is used if you want the average SPL across a wave's cycle
@@ -31359,7 +31358,6 @@ window.onload = function () {
     .onChange(() => {
       modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.A;
       modelCache = cache(modelCache, model, svgDim.width);
-      updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
       updatePressureChartAxis(layout.chartHeights, model.pressure);
       modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
@@ -31379,7 +31377,6 @@ window.onload = function () {
   updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
   window.requestAnimationFrame((newTimestamp) => update(svg, particles, modelCache, model, particleArea, layout.speakerConeX, newTimestamp))
   displacement_equations(model, modelCache, particles[0], 0);
-  updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
   updatePressureChartAxis(layout.chartHeights, model.pressure);
 
   document.getElementById('equation-t').oninput = (e) => {
@@ -31568,9 +31565,8 @@ function updateDisplacementCurve(svg, particles, modelCache, model) {
   let height = svg.getBoundingClientRect().height
 
   let phase = Math.PI;
-
-  let yScale = height * 0.05 / (modelCache.maxDisplacement * modelCache.toCordsScaleFactor);
-
+  // 0.01 is max amplitude value
+  let yScale = height * 0.05 / (0.01 * modelCache.toCordsScaleFactor);
   d3__WEBPACK_IMPORTED_MODULE_0__["select"](svg)
     .selectAll('.highlightedParticleDisplacementCurve')
     .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + modelCache.displacementCurveYoffset);
@@ -31656,7 +31652,7 @@ let presets = {
     "remembered": {
         "Clear wave bands": {
             "0": {
-                "particleNumber": 14410,
+                "particleNumber": 5010,
                 "size": 1,
                 "timeScale": 20,
                 "f": 10350,

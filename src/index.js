@@ -128,17 +128,16 @@ function drawDisplacementChart(svg, leftX, rightX, y, chartHeight) {
   d3.select(svg).append("text")
     .attr("transform", `translate(${leftX - 160},${y + chartHeight * 0.5})`)
     .text("Displacement");
-}
 
-function updateDisplacementChartAxis(height, maxDisplacement) {
-  let yRange = d3.scaleLinear().domain([maxDisplacement, -maxDisplacement]).range([0, height]);
+  let yRange2 = d3.scaleLinear().domain([0.01, -0.01]).range([0, chartHeight]);
 
-  var axis = d3.axisLeft(yRange)
+  var axis = d3.axisLeft(yRange2)
     .tickFormat((d, i) => d3.format(".3s")(d) + "m")
     .ticks(3);
 
   d3.select('#displacement-chart')
     .call(axis);
+
 }
 
 // rmsFactor is used if you want the average SPL across a wave's cycle
@@ -377,7 +376,6 @@ window.onload = function () {
     .onChange(() => {
       modelCache.maxDisplacement = unitToScalingFactor(model.maxDisplacementUnit) * model.A;
       modelCache = cache(modelCache, model, svgDim.width);
-      updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
       updatePressureChartAxis(layout.chartHeights, model.pressure);
       modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
       displacement_equations(model, modelCache, particles[0], document.getElementById('equation-t').value);
@@ -397,7 +395,6 @@ window.onload = function () {
   updateWaveLengthScale(svg, modelCache.simWidth, particleArea, modelCache);
   window.requestAnimationFrame((newTimestamp) => update(svg, particles, modelCache, model, particleArea, layout.speakerConeX, newTimestamp))
   displacement_equations(model, modelCache, particles[0], 0);
-  updateDisplacementChartAxis(layout.chartHeights, modelCache.maxDisplacement);
   updatePressureChartAxis(layout.chartHeights, model.pressure);
 
   document.getElementById('equation-t').oninput = (e) => {
@@ -586,9 +583,8 @@ function updateDisplacementCurve(svg, particles, modelCache, model) {
   let height = svg.getBoundingClientRect().height
 
   let phase = Math.PI;
-
-  let yScale = height * 0.05 / (modelCache.maxDisplacement * modelCache.toCordsScaleFactor);
-
+  // 0.01 is max amplitude value
+  let yScale = height * 0.05 / (0.01 * modelCache.toCordsScaleFactor);
   d3.select(svg)
     .selectAll('.highlightedParticleDisplacementCurve')
     .attr("cy", d => yScale * displacementTransform(d[0], modelCache, phase, modelCache.maxDisplacement, model.waveform.function) + modelCache.displacementCurveYoffset);

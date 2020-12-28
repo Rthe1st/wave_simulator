@@ -4,7 +4,7 @@ export let presets = {
     "remembered": {
         "Clear wave bands": {
             "0": {
-                "particleNumber": 14410,
+                "particleNumber": 5010,
                 "size": 1,
                 "timeScale": 20,
                 "f": 10350,
