@@ -58,7 +58,7 @@
                     id="r12">[12]</a></sup>. In millimeters.
             Amplitude can also refer to the change in pressure caused by a sound wave, in which case it's measure in
             pascals, not meters<sup><a href="#fn11" id="r11">[11]</a></sup>. A sound wave's pressure amplitude is
-            correlated and caused by the amplitude of the sound particles' displacements.</li>
+            correlated with and caused by the amplitude of the sound particles' displacements.</li>
         <li>$v$: The speed of sound, or how fast vibrations propagate between sound particles/through the medium
             (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium like
             density affect it but it's independent of properties of the sound wave/particle vibrations (amplitude,
@@ -73,7 +73,7 @@
                     id="r5">[5]</a></sup>. You can see this in the simulation as the distance
             between peaks/troughs of pressure.</li>
         <li>$k$: The spatial angular frequency of the wave, describing how many wave cycles it completes per meter.
-            Measured it in radians per meter ($2\pi$ radians being one wave cycle).</li>
+            Measured in radians per meter ($2\pi$ radians being one wave cycle).</li>
         <li>$x$: The initial distance of a particle from the sound source. It's displacement while vibrating is relative
             to this point. Together with $v$ it determines the phase offset of a particle's vibration relative to the
             sound source.</li>
@@ -85,7 +85,7 @@
             takes an
             angle in radians representing where in the current wave cycle the particle is (between $0$ and $2\pi$), and
             maps that
-            to its displacement. The output is between -1 and 1 so you multiply by $A$ to find the distance in meters.
+            to a displacement. The output is between -1 and 1 so you multiply by $A$ to find the distance in meters.
         </li>
         <li>$p$ the pressure caused by the sound wave, in pascals (pa)<sup><a href="#fn11" id="r11">[11]</a></sup>. Our
             values are absolute, not relative to ambient air pressure. It's value is constantly changing at each point
@@ -97,6 +97,8 @@
         <li>$\rho$ density of the medium (air) the vibration is in<sup><a href="#fn10" id="r10">[10]</a></sup>.</li>
         <li>$p_0$: reference pressure, approximately the quietest sound a young human with undamaged hearing can detect
             at 1,000 Hz<sup><a href="#fn3" id="r3">[3]</a></sup></li>
+        <li>${RMS factor}$, each wave form has a different Root Mean Square factor that you can multiply by the wave's max pressure to find the RMS of the wave. For common wave forms there are formulae to calculate the RMS from the pressure directly<sup><a href="#fn4"
+            id="r4">[4]</a></sup>.</li>
         <li>${SPL}$: The RMS pressure level caused by the sound, or (roughly) how loud it is.<sup><a href="#fn4"
                     id="r4">[4]</a></sup></li>
     </ul>
@@ -151,10 +153,10 @@
             from the left to the right of the simulation. In reality, if the vibrations on the right of the graph
             changed (it's displacement or frequency), it would take time for the new wave to propagate forwards - it
             would look like the new wave was chasing the old wave left to right.</li>
-        <li>You can't model low frequency or quite sounds. This is because for most sounds in our hearing range the
+        <li>It doesn't let you can't model low frequency or quite sounds. This is because for most sounds in our hearing range the
             particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both
-            on the same graph. For example, a 100dB sound causes a displacement of 100nm, while the lowest frequency we
-            can hear (~20hz) has a wave length of 17mm.</li>
+            on the same graph. For example, even a 100dB sound only causes a displacement of 100nm, which is tiny
+            compared to the 172mm wave length of a ~2000hz sound. For lower frequencies the wave lengths are even bigger and so the problem is worse.</li>
         <li>At high frequencies you get thick bands of particles are the peak pressure points, and they get wider as
             frequency increase. I don't understand this and wether it's a bug, limitation our model, or a real effect.
         </li>
@@ -168,6 +170,7 @@
             looks like.</li>
         <li>Even the loudest noises we can hear involve pretty tiny displacements of air - that's why speaker cones
             don't need to move very far to make a loud noise. Maximum movement only needs to be in millimeters.</li>
+        <li>Lower frequency sounds particles need to oscillate with a bigger amplitude to produce the same level of pressure.</li>
     </ul>
     </h2>
     <h2>Some more reading</h2>
@@ -177,6 +180,8 @@
         <li>https://physics.stackexchange.com/q/110102</li>
         <li>http://hyperphysics.phy-astr.gsu.edu/hbase/Sound/soucon.html</li>
         <li>https://www.physicsclassroom.com/Physics-Interactives/Waves-and-Sound/Simple-Wave-Simulator/Simple-Wave-Simulator-Interactive
+        </li>
+        <li>https://physics.stackexchange.com/questions/93424/how-far-do-air-particles-move-when-a-sound-wave-passes-through-them?rq=1
         </li>
     </ul>
     <h2>Footnotes</h2>
@@ -206,6 +211,7 @@
             href="https://en.wikipedia.org/wiki/Sound_pressure#Particle_displacement">this</a> section, but with
         $z_m(r,s)$ replaced with $z_0$</p>
     <p id="fn14"><a href="#r14">[14]</a>https://www.britannica.com/science/timbre</p>
+    <p id="fn15"><a href="#r15">[15]</a>https://en.wikipedia.org/wiki/Root_mean_square#In_waveform_combinations</p>
 </body>
 
 </html>
