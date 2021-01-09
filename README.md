@@ -18,3 +18,4 @@ Some of the sites I read while trying to build this (there's more specific ones 
 * https://www.physicsclassroom.com/Physics-Interactives/Waves-and-Sound/Simple-Wave-Simulator/Simple-Wave-Simulator-Interactive
   * [Just the simulation](https://www.physicsclassroom.com/PhysicsClassroom/media/interactive/SimpleWaves/index.html)
   * [Made by these guys](https://www.simbucket.com/) - who were kind enough to give me some pointers when I emailed them
+* [DatGui example](https://jsfiddle.net/ikatyang/182ztwao/)

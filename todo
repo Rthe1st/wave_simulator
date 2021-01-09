@@ -1,0 +1,7 @@
+* So dB level on right hand side of top pressure chart
+* Improve the interactive equations
+  *  Make a separate graph just to explain the single particle being modeled by them
+  * This should focus on showing the movement of the single particle being modeled in the equations, and the impact of the various parameters
+  * make equation x range same as the width of the simulation
+  * make equation t range same as wave period (so you can see values for one whole wave cycle)
+* Play the sounds being simulated (but with the volume scaled down - no 200dB sin waves please)

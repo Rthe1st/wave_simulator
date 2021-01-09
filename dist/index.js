@@ -31124,7 +31124,7 @@ function cache(modelCache, model, svgWidth) {
   let microFactor = 0.000001;
 
   modelCache.maxDisplacement = microFactor * model.A;
-  modelCache.timeScale = microFactor * model.timeScale;
+  modelCache.timeScale = model.timeScale;
 
   // cycles per second. spatial freq
   modelCache.w = 2 * Math.PI * model.f;
@@ -31211,7 +31211,7 @@ window.onload = function () {
 
   let model = {
     pause: false,
-    timeScale: 10,
+    timeScale: 0.00001,
     f: 10350,
     //todo: consider making this a dropdown
     // of speed of sound at specific temperatures/materials
@@ -31283,7 +31283,7 @@ window.onload = function () {
       modelCache.highLightedParticles = highlightedParticles(svg, particles, modelCache.maxDisplacement * modelCache.toCordsScaleFactor, highlightedParticleCount);
     });
 
-  gui.add(model, 'timeScale', 10, 500, 10)
+  gui.add(model, 'timeScale', 0.00001, 0.0005, 0.00001)
     .onChange((value) => {
       cache(modelCache, model, svgDim.width);
     });

@@ -49,31 +49,37 @@
     </div>
     <h2>Glossary</h2>
     <ul>
-        <li>${timeScale}$: What speed to play the simulation at, in microseconds per second of real time. So a value of
-            100 means it's slowed down to one-thousandth of a second (of real-time), 10 means one hundred-thousandth, 1 means
-            one-millionth.</li>
+        <li>${timeScale}$: How much slower then real time the simulation should run at. 0.00001 means it runs at
+            one-hundred-thousandth the speed of real time, 0.0001 means it plays at one-ten-thousandth.</li>
         <li>$t$: Time in microseconds since the source of sound started vibrating.</li>
-        <li><p>$A$: Amplitude, measured in millimeters. The maximum displacement of the vibrating particles from their starting positions, in the direction the sound wave is traveling.<sup><a href="#fn6" id="r6">[6]</a></sup><sup><a href="#fn12"
-                    id="r12">[12]</a></sup>.</p>
+        <li>
+            <p>$A$: Amplitude, measured in millimeters. The maximum displacement of the vibrating particles from their
+                starting positions, in the direction the sound wave is traveling.<sup><a href="#fn6"
+                        id="r6">[6]</a></sup><sup><a href="#fn12" id="r12">[12]</a></sup>.</p>
             <p>Amplitude can also refer to the pressure changed caused by a sound wave, in which case it's measure in
-            Pascals<sup><a href="#fn11" id="r11">[11]</a></sup>. The size of the pressure change is proportional to the amplitude of the sound particles' displacements.</p>
+                Pascals<sup><a href="#fn11" id="r11">[11]</a></sup>. The size of the pressure change is proportional to
+                the amplitude of the sound particles' displacements.</p>
         </li>
-        <li>$v$: The speed of sound in meters per second. How fast vibrations propagate between sound particles/through the medium
-            (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium (density, etc) affect it but it's independent of properties of the sound wave/particle vibrations (amplitude,
+        <li>$v$: The speed of sound in meters per second. How fast vibrations propagate between sound particles/through
+            the medium
+            (air)<sup><a href="#fn7" id="r7">[7]</a></sup>. In our simplified simulation properties of the medium
+            (density, etc) affect it but it's independent of properties of the sound wave/particle vibrations
+            (amplitude,
             frequency, etc).</li>
         <li>$f$: Frequency, measured in hz.<sup><a href="#fn8" id="r8">[8]</a></sup>. At a particle level this is how
             many times the
-            particle oscillates per
-            second. At a sound wave level it's how many complete wave cycles pass through a given point per second.
+            particle completes a full journey (back and forth) from its starting point per second. At a sound wave level
+            it's how many complete wave cycles pass through a given point per second.
             Both have the same value, with the sound wave's frequency being an emergent property of the sound particles'
             frequencies.</li>
-        <li>$\lambda$: Wave length, measured in millimeters. The distance over which the wave's shape repeats<sup><a href="#fn5"
-                    id="r5">[5]</a></sup>. You can see this in the simulation as the distance
+        <li>$\lambda$: Wave length, measured in millimeters. The distance over which the wave's shape repeats<sup><a
+                    href="#fn5" id="r5">[5]</a></sup>. You can see this in the simulation as the distance
             between peaks/troughs of pressure.</li>
         <li>$k$: The spatial angular frequency of the wave, describing how many wave cycles it completes per meter.
             Measured in radians per meter ($2\pi$ radians being one wave cycle).</li>
         <li>$x$: The initial distance of a particle from the sound source. It's displacement while vibrating is relative
-            to this point. Together with $v$ it determines the phase offset<sup><a href="#fn16" id="r16">[16]</a></sup> of a particle's vibration relative to the
+            to this point. Together with $v$ it determines the phase offset<sup><a href="#fn16" id="r16">[16]</a></sup>
+            of a particle's vibration relative to the
             sound source.</li>
         <li>$w$:The (temporal) angular frequency of the wave, describing how many oscillations it completes per second.
             Measured in
@@ -91,14 +97,18 @@
             (see SPL). Wikipedia has <a href="https://en.wikipedia.org/wiki/Sound_pressure#Examples_of_sound_pressure">a
                 good list</a> of the pressures caused by different sounds.</li>
         <li>$Z_0$: is the characteristic acoustic impedance of the medium (air) the sound/vibration is in<sup><a
-                    href="#fn9" id="r9">[9]</a></sup>. Can be imagined as the resistance of the medium to the vibration.</li>
+                    href="#fn9" id="r9">[9]</a></sup>. Can be imagined as the resistance of the medium to the vibration.
+        </li>
         <li>$\rho$: density of the medium (air) the vibration is in<sup><a href="#fn10" id="r10">[10]</a></sup>.</li>
         <li>$p_0$: reference pressure, approximately the quietest sound a young human with undamaged hearing can detect
             at 1,000 Hz<sup><a href="#fn3" id="r3">[3]</a></sup></li>
-        <li>${RMS factor}$, each wave form has a different Root Mean Square (RMS) factor that you can multiply by the wave's max pressure to find the RMS of the wave. For common wave forms there are formulae to calculate the RMS from the pressure directly<sup><a href="#fn4"
-            id="r4">[4]</a></sup>. To get RMS of a set of discrete values, you square them all, get the mean of the squares and find the square root of that. For a non-discrete values like a waveform it's calculated using integration.</li>
-        <li>${SPL}$: Sound Pressure Level (dB) - the RMS pressure level caused by the sound relative to $p_0$, (roughly) how loud it is.<sup><a href="#fn4"
-                    id="r4">[4]</a></sup></li>
+        <li>${RMS factor}$, each wave form has a different Root Mean Square (RMS) factor that you can multiply by the
+            wave's max pressure to find the RMS of the wave. For common wave forms there are formulae to calculate the
+            RMS from the pressure directly<sup><a href="#fn4" id="r4">[4]</a></sup>. To get RMS of a set of discrete
+            values, you square them all, get the mean of the squares and find the square root of that. For a
+            non-discrete values like a waveform it's calculated using integration.</li>
+        <li>${SPL}$: Sound Pressure Level (dB) - the RMS pressure level caused by the sound relative to $p_0$, (roughly)
+            how loud it is.<sup><a href="#fn4" id="r4">[4]</a></sup></li>
     </ul>
     <h2>Explanation</h2>
     <p>
@@ -119,20 +129,20 @@
         somewhere off to the right.
     </p>
     <p>
-        However this propagation takes time - obviously the particles near the source are made to vibrate earlier. This
+        However, the propagation takes time - obviously the particles near the source are made to vibrate earlier. This
         causes the vibrations of the particles to be out of phase with each other, having all started at different
-        times. The time it takes for vibrations to propagate among particles is determined by the underlying
+        times. The time it takes for vibrations to propagate through particles is determined by the underlying
         medium and this is what we call the speed of
         sound.
     </p>
     <p>
         The fact that the particles are vibrating out of phase is what causes the areas of low and high density
-        particles to appear, as particles at a slow points in their cycle are caught up by those at a fast points, or
+        particles to appear, as particles at slow points in their cycle are caught up by those at fast points, or
         vice versa.
     </p>
     <p>
         The maximum increase or decrease in density of particles (measured as pressure) is determined by the
-        distance each particles moves while vibrating and is called it's amplitude. This is a big factor in how loud
+        distance each particle moves while vibrating and is called it's amplitude. This is a big factor in how loud
         we perceive it to be.
     </p>
     <p>
@@ -146,29 +156,34 @@
     <ul>
         <li>Our imaginary sound wave doesn't lose energy (get quieter) as it progresses forwards.</li>
         <li>Everything is 2 dimensional.</li>
-        <li>We don't model the propagation of a change in the sound source. When a setting is changed, we draw the model
+        <li>We don't model the propagation of changes in the sound source. When a setting is changed, we draw the model
             as if the new wave has already had time to propagate all the way
             from the left to the right of the simulation. In reality, if the vibrations on the right of the graph
             changed (it's displacement or frequency), it would take time for the new wave to propagate forwards - it
             would look like the new wave was chasing the old wave left to right.</li>
-        <li>It doesn't let you can't model low frequency or quite sounds. This is because for most sounds in our hearing range the
+        <li>It doesn't let you model low frequency or quite sounds. This is because for most sounds in our hearing range
+            the
             particle displacement is so small relative to the wavelength of the sound that you cannot usefully draw both
-            on the same graph. For example, even a 100dB sound only causes a displacement of 100nm, which is tiny
-            compared to the 172mm wave length of a ~2000hz sound. For lower frequencies the wave lengths are even bigger and so the problem is worse.</li>
-        <li>At high frequencies you get thick bands of particles are the peak pressure points, and they get wider as
-            frequency increase. I don't understand this and wether it's a bug, limitation our model, or a real effect.
+            on the same graph. For example, a 100dB sound causes a displacement of 100nm, which is tiny
+            compared to the 172mm wave length of a ~2000hz sound. For lower frequencies the wave lengths are even bigger
+            and so the problem is worse.</li>
+        <li>At high frequencies you get thick bands of particles at the peak pressure points, and they get wider as
+            pressure caused by the sound increases. I don't understand this and wether it's a bug, limitation our model,
+            or a real effect. It seems to start happening when the change in pressure is bigger then atmospheric
+            pressure ($1.01×10^{5}{Pa}$)
         </li>
     </ul>
     <h2>Things that felt important when I learnt them</h2>
     <ul>
-        <li>A sound wave causes no net movement of particles - that's what fans do, not speakers.</li>
+        <li>A sound wave cause no net movement of particles - that's what fans do, not speakers.</li>
         <li>To repeat what's above: frequency of a sound is how many times its particles are moving back and forth per
             second, it's amplitude is how far they are moving and it's timbre is what the graph of that movement over
             time
             looks like.</li>
         <li>Even the loudest noises we can hear involve pretty tiny displacements of air - that's why speaker cones
             don't need to move very far to make a loud noise. Maximum movement only needs to be in millimeters.</li>
-        <li>Lower frequency sounds particles need to oscillate with a bigger amplitude to produce the same level of pressure.</li>
+        <li>Lower frequency sounds particles need to oscillate with a bigger amplitude to produce the same level of
+            pressure.</li>
     </ul>
     </h2>
     <h2>Some more reading</h2>
